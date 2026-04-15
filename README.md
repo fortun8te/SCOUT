@@ -11,10 +11,22 @@ A cloud-based news monitoring bot that aggregates AI/ML news and sends daily dig
 - ☁️ **Serverless**: Runs on Claude Code Routines (always on, no maintenance)
 - 🔄 **Smart deduplication**: Tracks processed articles in git
 
+## Phase 2 Features (Enhanced)
+
+### Core Features
+- 📰 **Multi-source aggregation**: HN, ArXiv, Reddit, NewsAPI, **Bluesky** (real-time!)
+- 🤖 **Intelligent filtering**: 100+ keyword patterns, relevance scoring
+- ⚡ **Real-time monitoring**: Sub-second Bluesky + 6-hour batch cycle
+- 💬 **Telegram integration**: Clean, formatted daily digests
+- ☁️ **Serverless**: Runs on Claude Code Routines
+- 🔄 **Smart deduplication**: Git-based state tracking
+- ✨ **Optional AI summaries**: Google Gemini free tier (1,500 req/day)
+- 📊 **Analytics & trending**: Track top sources and trending keywords
+
 ## Supported News Categories
 
 - **Model Releases**: New AI models, announcements
-- **Breaking News**: Leaks, rumors, major announcements
+- **Breaking News**: Leaks, rumors, major announcements (Bluesky real-time)
 - **Research**: Academic papers, technical breakthroughs
 - **Technical Methods**: Fine-tuning, RAG, prompt engineering, etc.
 - **Other**: General AI news and discussions
@@ -22,13 +34,13 @@ A cloud-based news monitoring bot that aggregates AI/ML news and sends daily dig
 ## News Sources
 
 ### Tier 1: Real-Time, Free, No Auth Required
+- **Bluesky Jetstream** (WebSocket, sub-second) ⭐ NEW - Real-time AI posts
 - **HackerNews** (Algolia API) - Top tech discussions
 - **ArXiv** - Latest AI/ML research papers
 - **Reddit** - Community discussions (MachineLearning, OpenAI, LocalLLaMA)
-- **RSS Feeds** - Tech blogs and news sites
 
-### Tier 2: News Aggregation (Optional, $29-100/month)
-- **NewsAPI.org** - General tech news
+### Tier 2: News Aggregation (Optional, FREE)
+- **NewsAPI.org** - General tech news (100 req/day)
 - **GitHub Trending** - Popular AI/ML repositories
 
 ## Quick Setup
