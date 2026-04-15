@@ -120,62 +120,40 @@ class DiscordNotifier:
 
             # Create header embed
             total_articles = sum(len(v) for v in articles_by_category.values())
-            header_embed = {
-                "title": "AI News Update",
-                "description": f"{total_articles} stories from today",
-                "color": 0x1f77b4,
-                "fields": []
-            }
+            today = datetime.now().strftime("%b %d, %Y")
 
-            for category in articles_by_category:
-                if articles_by_category[category]:
-                    header_embed["fields"].append({
-                        "name": category.title(),
-                        "value": str(len(articles_by_category[category])),
-                        "inline": True
-                    })
+            header_embed = {
+                "title": f"AI News - {today}",
+                "description": f"{total_articles} stories",
+                "color": 0x1f77b4
+            }
 
             embeds.append(header_embed)
 
-            # Create embeds for each article (max 10 per category)
+            # Create embeds for each article (max 10 total, 3 per category)
             article_count = 0
             for category, articles in articles_by_category.items():
-                if not articles or article_count >= 25:  # Max 25 articles across embeds
+                if not articles or article_count >= 10:
                     continue
 
                 cat_color = self.CATEGORY_COLORS.get(category, 0x606060)
 
-                for article in articles[:5]:  # Max 5 per category
-                    if article_count >= 25:
+                for article in articles[:3]:
+                    if article_count >= 10:
                         break
 
-                    title = article.get("title", "No title")[:256]
+                    title = article.get("title", "")[:120]
                     url = article.get("url", "")
                     source = article.get("source", "Unknown")
-                    score = article.get("relevance_score", 0)
 
                     embed = {
                         "title": title,
                         "url": url,
-                        "color": cat_color,
-                        "fields": [
-                            {
-                                "name": "Source",
-                                "value": source,
-                                "inline": True
-                            },
-                            {
-                                "name": "Relevance",
-                                "value": f"{score:.0%}",
-                                "inline": True
-                            }
-                        ]
+                        "color": cat_color
                     }
 
-                    # Add summary if available
-                    summary = article.get("summary", "")
-                    if summary:
-                        embed["description"] = summary[:150].strip()
+                    if source:
+                        embed["description"] = source
 
                     embeds.append(embed)
                     article_count += 1
@@ -309,34 +287,28 @@ class DiscordNotifier:
 
     def format_digest(self, articles_by_category: Dict[str, List[Dict]]) -> str:
         """Format articles for Discord text fallback"""
+        from datetime import datetime
         lines = []
-        lines.append("AI News Update")
-        lines.append("=" * 40)
 
+        today = datetime.now().strftime("%b %d")
         total_articles = sum(len(v) for v in articles_by_category.values())
-        lines.append(f"{total_articles} stories\n")
+
+        lines.append(f"**AI News - {today}** ({total_articles} stories)")
+        lines.append("")
 
         article_num = 1
-
         for category, articles in articles_by_category.items():
             if not articles:
                 continue
 
-            lines.append(f"{category.upper()} ({len(articles)})")
-            lines.append("-" * 40)
-
-            for article in articles[:5]:
-                title = article.get("title", "No title")[:100]
-                score = article.get("relevance_score", 0)
+            for article in articles[:3]:  # Max 3 per category
+                title = article.get("title", "")[:80]
                 source = article.get("source", "Unknown")
 
-                lines.append(f"{article_num}. {title}")
-                lines.append(f"   {source} | {score:.0%}")
+                lines.append(f"**{article_num}. {title}**")
+                lines.append(f"{source}")
                 lines.append("")
                 article_num += 1
-
-        lines.append("=" * 40)
-        lines.append("Next update in 6 hours")
 
         return "\n".join(lines)
 
