@@ -160,10 +160,11 @@ async def main():
         analytics.record_run(len(all_articles), len(new_articles),
                            sources_checked, new_articles)
 
-        # Prepare Discord notification
+        # Prepare Discord notification (supports both channel and DM mode)
         notifier = DiscordNotifier(
             bot_token=os.getenv("DISCORD_BOT_TOKEN", ""),
-            channel_id=os.getenv("DISCORD_CHANNEL_ID", "")
+            channel_id=os.getenv("DISCORD_CHANNEL_ID", ""),
+            user_id=os.getenv("DISCORD_USER_ID", "")
         )
 
         if new_articles:

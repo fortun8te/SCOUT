@@ -21,10 +21,46 @@ class DiscordNotifier:
         "other": 0x606060        # Gray
     }
 
-    def __init__(self, bot_token: str, channel_id: str):
+    def __init__(self, bot_token: str, channel_id: str = None, user_id: str = None):
         self.bot_token = bot_token
         self.channel_id = channel_id
-        self.api_url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
+        self.user_id = user_id
+        self.dm_channel_id = None
+
+        # For DMs, we'll get the DM channel on first use
+        if user_id and not channel_id:
+            self._init_dm_channel()
+
+        if channel_id:
+            self.api_url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
+        else:
+            self.api_url = None
+
+    def _init_dm_channel(self):
+        """Initialize DM channel with user"""
+        try:
+            result = subprocess.run(
+                [
+                    "curl", "-s", "-X", "POST",
+                    "https://discord.com/api/v10/users/@me/channels",
+                    "-H", f"Authorization: Bot {self.bot_token}",
+                    "-H", "Content-Type: application/json",
+                    "-d", json.dumps({"recipient_id": self.user_id})
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode == 0:
+                response = json.loads(result.stdout)
+                self.dm_channel_id = response.get("id")
+                self.api_url = f"https://discord.com/api/v10/channels/{self.dm_channel_id}/messages"
+                logger.info(f"DM channel initialized: {self.dm_channel_id}")
+            else:
+                logger.error(f"Failed to init DM channel: {result.stderr}")
+        except Exception as e:
+            logger.error(f"DM channel init error: {e}")
 
     def send_digest(self, digest_text: str) -> bool:
         """Send formatted digest to Discord (plain text fallback)"""
