@@ -223,9 +223,9 @@ async def main():
 
         # Try to send comprehensive error alert to Discord
         try:
-            notifier = DiscordNotifier(
+            error_notifier = DiscordNotifier(
                 bot_token=os.getenv("DISCORD_BOT_TOKEN", ""),
-                channel_id=os.getenv("DISCORD_CHANNEL_ID", "")
+                user_id=os.getenv("DISCORD_USER_ID", "")
             )
 
             # Include error context
@@ -236,7 +236,7 @@ Time: {datetime.utcnow().isoformat()}Z
 
 Check logs at: claude.ai/code/routines
 Next attempt: 6 hours"""
-            notifier.send_error_alert(error_msg.strip())
+            error_notifier.send_error_alert(error_msg.strip())
             logger.info("Error alert sent to Discord")
 
         except Exception as alert_error:
