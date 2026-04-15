@@ -59,8 +59,7 @@ async def main():
         bot_token = os.getenv("DISCORD_BOT_TOKEN", "")
         if bot_token:
             bot_manager = BotStatusManager(bot_token)
-            bot_manager.connect_background()
-            await asyncio.sleep(1)  # Let bot connect
+            await bot_manager.connect_and_wait()
 
         # Initialize components
         state = StateManager(Path("data/processed_news.json"))

@@ -33,14 +33,24 @@ class BotStatusManager:
         except Exception as e:
             logger.error(f"Bot status error: {e}")
 
-    def connect_background(self):
-        """Start bot connection in background task"""
+    async def connect_and_wait(self):
+        """Start bot connection and wait for ready"""
         try:
-            # Create task that runs in background
-            asyncio.create_task(self.set_dnd_status_background())
-            logger.info("[BOT] Starting background connection...")
+            # Start connection - this runs concurrently
+            task = asyncio.create_task(self.set_dnd_status_background())
+
+            # Wait a bit for connection to establish
+            for _ in range(30):  # Try for 3 seconds
+                if self.ready:
+                    logger.info("[BOT] Connected and ready")
+                    return task
+                await asyncio.sleep(0.1)
+
+            logger.warning("[BOT] Timeout waiting for connection (but continuing anyway)")
+            return task
         except Exception as e:
-            logger.error(f"Failed to start bot background: {e}")
+            logger.error(f"Failed to connect bot: {e}")
+            return None
 
     async def disconnect(self):
         """Disconnect bot cleanly"""
