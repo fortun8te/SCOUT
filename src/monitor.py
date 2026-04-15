@@ -47,18 +47,19 @@ logger = logging.getLogger(__name__)
 
 async def main():
     """Main orchestration function - Phase 2 Enhanced"""
+    bot_manager = None
     try:
         logger.info("=" * 70)
         logger.info("SCOUT News Monitor Starting")
         logger.info(f"Run time: {datetime.utcnow().isoformat()}Z")
         logger.info("=" * 70)
 
-        # Set bot status to DND
+        # Connect bot in background to maintain DND status
         bot_token = os.getenv("DISCORD_BOT_TOKEN", "")
         if bot_token:
-            status_mgr = BotStatusManager(bot_token)
-            status_mgr.run_status_update()
-            logger.info("[BOT] Status set to DND")
+            bot_manager = BotStatusManager(bot_token)
+            bot_manager.connect_background()
+            await asyncio.sleep(1)  # Let bot connect
 
         # Initialize components
         state = StateManager(Path("data/processed_news.json"))
@@ -255,6 +256,14 @@ Next attempt: 6 hours"""
         logger.error("MONITOR FAILED - Check logs above for details")
         logger.info("=" * 70)
         exit(1)
+
+    finally:
+        # Disconnect bot at end of execution
+        if bot_manager:
+            try:
+                await bot_manager.disconnect()
+            except Exception as e:
+                logger.warning(f"Bot disconnect error: {e}")
 
 
 if __name__ == "__main__":

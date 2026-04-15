@@ -13,43 +13,40 @@ class BotStatusManager:
     def __init__(self, bot_token: str):
         self.bot_token = bot_token
         self.client = None
+        self.ready = False
 
-    async def set_dnd_status(self):
-        """Set bot to DND (Do Not Disturb) status"""
+    async def set_dnd_status_background(self):
+        """Connect bot and keep DND status during execution"""
         try:
             intents = Intents.default()
             self.client = Client(intents=intents)
 
             @self.client.event
             async def on_ready():
-                # Set status to DND with "Monitoring news"
-                await self.client.change_presence(
-                    status=Status.dnd,
-                    activity=None
-                )
-                logger.info("Bot status set to DND")
-                # Keep the connection alive briefly then close
-                await asyncio.sleep(2)
-                await self.client.close()
+                await self.client.change_presence(status=Status.dnd)
+                logger.info("[BOT] Connected - Status: DND")
+                self.ready = True
 
-            # Connect and maintain for a moment
-            await asyncio.wait_for(self.client.start(self.bot_token), timeout=10)
+            # Start the bot in background
+            await self.client.start(self.bot_token)
 
-        except asyncio.TimeoutError:
-            logger.info("Status update completed (timeout as expected)")
-            if self.client:
-                await self.client.close()
         except Exception as e:
-            logger.error(f"Failed to set DND status: {e}")
-            if self.client:
-                try:
-                    await self.client.close()
-                except:
-                    pass
+            logger.error(f"Bot status error: {e}")
 
-    def run_status_update(self):
-        """Synchronous wrapper to set status"""
+    def connect_background(self):
+        """Start bot connection in background task"""
         try:
-            asyncio.run(self.set_dnd_status())
+            # Create task that runs in background
+            asyncio.create_task(self.set_dnd_status_background())
+            logger.info("[BOT] Starting background connection...")
         except Exception as e:
-            logger.error(f"Status update error: {e}")
+            logger.error(f"Failed to start bot background: {e}")
+
+    async def disconnect(self):
+        """Disconnect bot cleanly"""
+        try:
+            if self.client:
+                await self.client.close()
+                logger.info("[BOT] Disconnected")
+        except Exception as e:
+            logger.error(f"Failed to disconnect bot: {e}")
