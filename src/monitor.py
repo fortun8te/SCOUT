@@ -210,8 +210,19 @@ async def main():
         )
 
         if new_articles:
-            # Categorize articles
-            categorized = filter_engine.categorize(new_articles)
+            # Keep only top 1-5 articles by relevance score
+            top_articles = sorted(
+                new_articles,
+                key=lambda x: x.get("relevance_score", 0),
+                reverse=True
+            )[:5]  # Max 5 articles
+
+            logger.info(
+                f"[CURATE] Filtered {len(new_articles)} articles down to top {len(top_articles)} by relevance"
+            )
+
+            # Categorize top articles only
+            categorized = filter_engine.categorize(top_articles)
             logger.info(
                 f"[FORMAT] Categorized: "
                 f"{', '.join(f'{k}:{len(v)}' for k, v in categorized.items() if v)}"
@@ -221,20 +232,20 @@ async def main():
             breaking_articles = categorized.get("breaking", [])
             if breaking_articles:
                 logger.info(f"[BREAKING] Sending {len(breaking_articles)} breaking news alerts...")
-                for article in breaking_articles[:3]:  # Alert on top 3 breaking news
+                for article in breaking_articles[:1]:  # Alert on top breaking news only
                     if article.get("relevance_score", 0) > 0.85:
                         notifier.send_breaking_alert(article)
 
             # Format and send digest (prefer rich embeds)
-            logger.info("[DISCORD] Sending digest with rich embeds...")
+            logger.info("[DISCORD] Sending curated digest with rich embeds...")
             if notifier.send_digest_embeds(categorized):
-                logger.info(f"Discord notification sent with {len(new_articles)} articles (embeds)")
+                logger.info(f"Discord notification sent with {len(top_articles)} articles (embeds)")
             else:
                 # Fallback to text format if embeds fail
                 logger.warning("Embed send failed, falling back to text format")
                 digest = notifier.format_digest(categorized)
                 if notifier.send_digest(digest):
-                    logger.info(f"Discord notification sent with {len(new_articles)} articles (text)")
+                    logger.info(f"Discord notification sent with {len(top_articles)} articles (text)")
                 else:
                     logger.error("Failed to send Discord notification")
 

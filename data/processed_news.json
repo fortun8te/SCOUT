@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-04-15T23:53:27.999175Z",
+  "last_run": "2026-04-15T23:54:43.126147Z",
   "processed_articles": {
     "gh_1201173969": {
       "title": "caveman: \ud83e\udea8 why use many token when few token do trick \u2014 Claude Code skill that cuts 65% o",
@@ -574,12 +574,236 @@
       "source": "Slashdot",
       "processed_at": "2026-04-15T23:53:27.999092Z",
       "score": 0.2
+    },
+    "echojs_8": {
+      "title": "oh-my-hi: Visual dashboard for your Claude Code harness",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125939Z",
+      "score": 0.24571428571428572
+    },
+    "echojs_1": {
+      "title": "New Vue UI components from SVAR: 30+ controls, edit forms, and filtering widgets",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125953Z",
+      "score": 0.23
+    },
+    "echojs_3": {
+      "title": "Soft deletes in a Zustand store via enumerable:false property descriptors",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125955Z",
+      "score": 0.23
+    },
+    "echojs_4": {
+      "title": "Phantom UI \u2013 Skeleton that measures your real DOM (Web Component, 8kb)",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125957Z",
+      "score": 0.23
+    },
+    "echojs_5": {
+      "title": "A lightweight front end framework with native JavaScript/TS feel",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125965Z",
+      "score": 0.23
+    },
+    "echojs_6": {
+      "title": "Zephyr Events \u2013 A 2KB TypeScript event emitter that&#39;s race-condition safe",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125967Z",
+      "score": 0.23
+    },
+    "echojs_7": {
+      "title": "easy-live2d v0.4.0: A Milestone Release for Live2D on the Web",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125969Z",
+      "score": 0.23
+    },
+    "csstricks_9": {
+      "title": "What\u2019s !important #8: Light/Dark Favicons, @mixin, object-view-box, and More",
+      "url": "https://css-tricks.com/css-olfactive-api/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125972Z",
+      "score": 0.23
+    },
+    "wds_3": {
+      "title": "Why You Should Review Your Own Code And How To Review It Effectively",
+      "url": "https://blog.webdevsimplified.com/2019-10/do-not-use-class-selectors-in-javascript/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.125975Z",
+      "score": 0.23
+    },
+    "echojs_0": {
+      "title": "Letting Product Teams Own SVG Icons (Without Code Changes)",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125979Z",
+      "score": 0.2
+    },
+    "echojs_2": {
+      "title": "A minimal Node.js wrapper around ClamAV",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125981Z",
+      "score": 0.2
+    },
+    "echojs_9": {
+      "title": "Auth library with AI agent identity and MCP OAuth 2.1",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125983Z",
+      "score": 0.2
+    },
+    "echojs_10": {
+      "title": "Your options for preloading images with JavaScript",
+      "url": "https://www.echojs.com/rss",
+      "source": "Echo JS",
+      "processed_at": "2026-04-15T23:54:43.125984Z",
+      "score": 0.2
+    },
+    "csstricks_0": {
+      "title": "CSS-Tricks",
+      "url": "https://css-tricks.com",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125986Z",
+      "score": 0.2
+    },
+    "csstricks_1": {
+      "title": "The Radio State Machine",
+      "url": "https://css-tricks.com",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125987Z",
+      "score": 0.2
+    },
+    "csstricks_2": {
+      "title": "7 View Transitions Recipes to Try",
+      "url": "https://css-tricks.com/the-radio-state-machine/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125989Z",
+      "score": 0.2
+    },
+    "csstricks_3": {
+      "title": "Selecting a Date Range in CSS",
+      "url": "https://css-tricks.com/7-view-transitions-recipes-to-try/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125990Z",
+      "score": 0.2
+    },
+    "csstricks_4": {
+      "title": "Alternatives to the !important Keyword",
+      "url": "https://css-tricks.com/selecting-a-date-range-in-css/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125992Z",
+      "score": 0.2
+    },
+    "csstricks_5": {
+      "title": "Looking at New CSS Multi-Column Layout Wrapping Features",
+      "url": "https://css-tricks.com/alternatives-to-the-important-keyword/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125993Z",
+      "score": 0.2
+    },
+    "csstricks_6": {
+      "title": "Making Complex CSS Shapes Using shape()",
+      "url": "https://css-tricks.com/css-multi-column-layout-wrapping-features/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125995Z",
+      "score": 0.2
+    },
+    "csstricks_7": {
+      "title": "Front-End Fools: Top 10 April Fools\u2019 UI Pranks of All Time",
+      "url": "https://css-tricks.com/complex-css-shapes-with-shape-function/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125996Z",
+      "score": 0.2
+    },
+    "csstricks_8": {
+      "title": "Sniffing Out the CSS Olfactive API",
+      "url": "https://css-tricks.com/front-end-april-fools-top-10/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.125999Z",
+      "score": 0.2
+    },
+    "csstricks_10": {
+      "title": "Form Automation Tips for Happier User and Clients",
+      "url": "https://css-tricks.com/whats-important-8/",
+      "source": "CSS Tricks",
+      "processed_at": "2026-04-15T23:54:43.126002Z",
+      "score": 0.2
+    },
+    "wds_0": {
+      "title": "How To Effectively Test For Colorblind Accessibility",
+      "url": "https://blog.webdevsimplified.com/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126004Z",
+      "score": 0.2
+    },
+    "wds_1": {
+      "title": "How To Use ES6 Modules With Node.js",
+      "url": "https://blog.webdevsimplified.com/2019-09/colorblind-accessibility-testing/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126006Z",
+      "score": 0.2
+    },
+    "wds_2": {
+      "title": "Why You Shouldn&apos;t Use Class Selectors In JavaScript",
+      "url": "https://blog.webdevsimplified.com/2019-09/es6-modules-in-nodejs/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126009Z",
+      "score": 0.2
+    },
+    "wds_4": {
+      "title": "Why You Should Use Data Attributes In CSS",
+      "url": "https://blog.webdevsimplified.com/2019-10/how-to-code-review-effectively/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126011Z",
+      "score": 0.2
+    },
+    "wds_6": {
+      "title": "How To Learn Any Topic Fast",
+      "url": "https://blog.webdevsimplified.com/2019-10/what-is-short-circuiting/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126014Z",
+      "score": 0.2
+    },
+    "wds_7": {
+      "title": "The Power Of Custom Hooks",
+      "url": "https://blog.webdevsimplified.com/2019-11/how-to-learn-any-topic-fast/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126016Z",
+      "score": 0.2
+    },
+    "wds_8": {
+      "title": "Why You Should Never Store Derived State",
+      "url": "https://blog.webdevsimplified.com/2019-11/how-to-write-custom-hooks/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126019Z",
+      "score": 0.2
+    },
+    "wds_9": {
+      "title": "How Physical Activity Will Make You A Better Developer",
+      "url": "https://blog.webdevsimplified.com/2019-11/never-store-derived-state/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126022Z",
+      "score": 0.2
+    },
+    "wds_10": {
+      "title": "Local State Is The Best State",
+      "url": "https://blog.webdevsimplified.com/2019-11/the-importance-of-fitness/",
+      "source": "Web Dev Simplified",
+      "processed_at": "2026-04-15T23:54:43.126025Z",
+      "score": 0.2
     }
   },
-  "run_count": 6,
+  "run_count": 7,
   "statistics": {
-    "total_processed": 82,
-    "sent_today": 23,
+    "total_processed": 114,
+    "sent_today": 32,
     "sources_checked": [
       "HackerNews",
       "ArXiv",
@@ -590,6 +814,7 @@
       "Indie Hackers",
       "Slashdot",
       "Mastodon",
+      "RSS Feeds (20+ sources)",
       "GitHub Trending"
     ]
   }

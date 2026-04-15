@@ -13,6 +13,19 @@ logger = logging.getLogger(__name__)
 class AdditionalSources:
     """Additional high-quality sources for comprehensive coverage"""
 
+    # Massive list of tech/AI news sites
+    TECH_NEWS_FEEDS = [
+        "https://news.ycombinator.com/",
+        "https://techcrunch.com/",
+        "https://theverge.com/",
+        "https://arstechnica.com/",
+        "https://slashdot.org/",
+        "https://producthunt.com/",
+        "https://indiehackers.com/",
+        "https://dev.to/",
+        "https://medium.com/",
+    ]
+
     def __init__(self):
         self.session = requests.Session()
 
@@ -139,19 +152,57 @@ class AdditionalSources:
             logger.warning(f"GitHub trending error: {e}")
             return []
 
+    async def fetch_generic_tech_sites(self) -> List[Dict]:
+        """Fetch from generic tech news sites using search/scraping"""
+        articles = []
+
+        # Common tech news endpoints
+        tech_sources = [
+            ("Wired", "https://www.wired.com/feed/rss", "wired"),
+            ("VentureBeat", "https://venturebeat.com/feed/", "venturebeat"),
+            ("MIT Tech Review", "https://www.technologyreview.com/feed.rss", "mitreview"),
+        ]
+
+        for name, url, source_id in tech_sources:
+            try:
+                response = self.session.get(url, timeout=10)
+                if response.status_code == 200:
+                    # Basic RSS parsing
+                    import re as regex
+                    titles = regex.findall(r'<title>([^<]+)</title>', response.text)
+                    urls = regex.findall(r'<link>([^<]+)</link>', response.text)
+
+                    for i, title in enumerate(titles[1:11]):  # Skip feed title
+                        if i < len(urls):
+                            articles.append({
+                                "id": f"{source_id}_{i}",
+                                "title": title.strip(),
+                                "url": urls[i] if urls[i].startswith('http') else url,
+                                "source": name,
+                                "published_at": datetime.utcnow(),
+                                "engagement_score": 0,
+                                "is_recent": True
+                            })
+            except Exception as e:
+                logger.debug(f"{name} fetch error: {e}")
+                continue
+
+        return articles
+
     async def fetch_all_additional(self) -> tuple:
-        """Fetch all additional sources in parallel"""
+        """Fetch all additional sources in parallel - MASSIVE LIST"""
         results = await asyncio.gather(
             self.fetch_product_hunt(),
             self.fetch_devto(),
             self.fetch_github_trending(),
+            self.fetch_generic_tech_sites(),
             return_exceptions=True
         )
 
         all_articles = []
         sources = []
 
-        source_names = ["Product Hunt", "Dev.to", "GitHub Trending"]
+        source_names = ["Product Hunt", "Dev.to", "GitHub Trending", "Tech News Feeds"]
 
         for i, result in enumerate(results):
             if isinstance(result, Exception):

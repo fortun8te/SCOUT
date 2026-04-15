@@ -1,6 +1,6 @@
 {
-  "total_articles_processed": 320,
-  "total_articles_sent": 82,
+  "total_articles_processed": 442,
+  "total_articles_sent": 114,
   "runs": [
     {
       "timestamp": "2026-04-15T23:40:25.682040Z",
@@ -81,23 +81,43 @@
         "GitHub Trending"
       ],
       "discovery_rate": 0.25842696629213485
+    },
+    {
+      "timestamp": "2026-04-15T23:54:43.126155Z",
+      "articles_fetched": 122,
+      "articles_sent": 32,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "Lobsters",
+        "TechCrunch",
+        "Medium",
+        "Indie Hackers",
+        "Slashdot",
+        "Mastodon",
+        "RSS Feeds (20+ sources)",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.26229508196721313
     }
   ],
   "top_sources": {
-    "HackerNews": 6,
-    "ArXiv": 6,
-    "Reddit": 6,
-    "GitHub Trending": 6,
-    "Lobsters": 2,
-    "TechCrunch": 2,
-    "Medium": 1,
-    "Indie Hackers": 1,
-    "Slashdot": 1,
-    "Mastodon": 1
+    "HackerNews": 7,
+    "ArXiv": 7,
+    "Reddit": 7,
+    "GitHub Trending": 7,
+    "Lobsters": 3,
+    "TechCrunch": 3,
+    "Medium": 2,
+    "Indie Hackers": 2,
+    "Slashdot": 2,
+    "Mastodon": 2,
+    "RSS Feeds (20+ sources)": 1
   },
   "trending_keywords": {
-    "claude": 3,
-    "ai": 27,
+    "claude": 4,
+    "ai": 28,
     "gemini": 1,
     "model": 10,
     "vision": 1,
@@ -116,7 +136,7 @@
   },
   "category_distribution": {},
   "hourly_distribution": {
-    "hour_23": 6
+    "hour_23": 7
   },
   "discovery_rate": 0
 }
