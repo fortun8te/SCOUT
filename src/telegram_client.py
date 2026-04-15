@@ -49,21 +49,20 @@ class TelegramNotifier:
     def format_digest(self, articles_by_category: Dict[str, List[Dict]]) -> str:
         """Format articles into a readable digest"""
         lines = []
-        lines.append("📰 <b>AI News Daily Digest</b>")
+        lines.append("<b>AI News Update</b>")
         lines.append("")
 
         total_articles = sum(len(v) for v in articles_by_category.values())
-        lines.append(f"<i>{total_articles} stories</i>")
-        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"{total_articles} stories")
         lines.append("")
 
-        # Category emojis
-        category_icons = {
-            "models": "🤖",
-            "breaking": "⚡",
-            "research": "📊",
-            "technical": "🔧",
-            "other": "📌"
+        # Category names without emoji
+        category_names = {
+            "models": "NEW MODELS",
+            "breaking": "BREAKING",
+            "research": "RESEARCH",
+            "technical": "TECHNICAL",
+            "other": "OTHER"
         }
 
         article_num = 1
@@ -72,30 +71,36 @@ class TelegramNotifier:
             if not articles:
                 continue
 
-            icon = category_icons.get(category, "📌")
-            cat_name = category.upper()
+            cat_name = category_names.get(category, "OTHER")
 
-            lines.append(f"{icon} <b>{cat_name}</b>")
-            lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            lines.append(f"<b>{cat_name}</b>")
             lines.append("")
 
             for article in articles[:5]:  # Top 5 per category
-                title = article.get("title", "No title")[:70]  # Truncate
+                title = article.get("title", "No title")[:75]  # Truncate
                 score = article.get("relevance_score", 0)
                 source = article.get("source", "Unknown")
+                summary = article.get("summary", "")
 
                 # Escape HTML special chars
                 title = (title.replace("&", "&amp;")
                         .replace("<", "&lt;")
                         .replace(">", "&gt;"))
+                if summary:
+                    summary = (summary.replace("&", "&amp;")
+                              .replace("<", "&lt;")
+                              .replace(">", "&gt;"))
 
-                lines.append(f"<b>{article_num}.</b> {title}")
-                lines.append(f"   <a href=\"{article.get('url', '#')}\">🔗 {source}</a> | ⭐ {score:.1%}")
+                lines.append(f"{article_num}. {title}")
+                if summary:
+                    lines.append(f"   {summary}")
+                lines.append(f"   {source} | {score:.0%} relevant")
+                lines.append(f"   {article.get('url', '#')}")
                 lines.append("")
                 article_num += 1
 
-        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        lines.append(f"<i>✨ Update complete | Next digest in 6h</i>")
+        lines.append("---")
+        lines.append(f"Next update in 3 hours")
 
         return "\n".join(lines)
 

@@ -8,23 +8,49 @@ logger = logging.getLogger(__name__)
 
 # Keyword weighting for relevance scoring
 KEYWORDS = {
-    # Model releases (highest priority)
+    # Model releases (new AI models)
     "model_release": {
         "patterns": [
             r"GPT-\d+", r"Claude", r"Llama", r"Mixtral", r"Phi", r"Qwen",
-            r"released", r"launch", r"announce.*available", r"beta", r"alpha"
+            r"released", r"launch", r"announce.*available", r"beta", r"alpha",
+            r"new model", r"model.*available"
         ],
         "weight": 0.35
+    },
+    # Anthropic specific news
+    "anthropic_news": {
+        "patterns": [
+            r"Anthropic", r"Claude", r"Constitutional AI", r"Chroma",
+            r"Contextual Bandits", r"RLHF", r"Mythic"
+        ],
+        "weight": 0.32
+    },
+    # OpenAI and OpenClaw
+    "openai_news": {
+        "patterns": [
+            r"OpenAI", r"OpenClaw", r"o1", r"o3", r"GPT",
+            r"ChatGPT", r"Sora", r"DALLE"
+        ],
+        "weight": 0.32
+    },
+    # Image models and generation
+    "image_models": {
+        "patterns": [
+            r"Midjourney", r"DALL-E", r"Flux", r"Stable Diffusion",
+            r"image.*model", r"image generation", r"text-to-image",
+            r"vision.*model", r"multimodal"
+        ],
+        "weight": 0.28
     },
     # Leaks and rumors
     "leaks": {
         "patterns": [
             r"leak", r"coming soon", r"rumor", r"alleged", r"unreleased",
-            r"codename", r"internal", r"roadmap"
+            r"codename", r"internal", r"roadmap", r"rumored"
         ],
         "weight": 0.25
     },
-    # Benchmarks
+    # Benchmarks and records
     "benchmark": {
         "patterns": [
             r"SOTA", r"state-of-the-art", r"record", r"beats", r"outperforms",
@@ -32,7 +58,7 @@ KEYWORDS = {
         ],
         "weight": 0.30
     },
-    # Technical methods
+    # Technical methods and frameworks
     "method": {
         "patterns": [
             r"fine-tun", r"LORA", r"RAG", r"prompt engineering", r"multimodal",
@@ -41,11 +67,19 @@ KEYWORDS = {
         ],
         "weight": 0.20
     },
+    # Outages and issues
+    "outages": {
+        "patterns": [
+            r"outage", r"down", r"offline", r"issue", r"bug",
+            r"error", r"broken", r"failed", r"degradation"
+        ],
+        "weight": 0.22
+    },
     # Company announcements
     "company": {
         "patterns": [
             r"OpenAI", r"Anthropic", r"Google", r"DeepMind", r"Meta",
-            r"Mistral", r"Stability AI", r"xAI"
+            r"Mistral", r"Stability AI", r"xAI", r"Together AI"
         ],
         "weight": 0.10
     }
