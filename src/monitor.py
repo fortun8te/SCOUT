@@ -58,8 +58,12 @@ async def main():
         # Connect bot in background to maintain DND status
         bot_token = os.getenv("DISCORD_BOT_TOKEN", "")
         if bot_token:
-            bot_manager = BotStatusManager(bot_token)
-            await bot_manager.connect_and_wait()
+            try:
+                bot_manager = BotStatusManager(bot_token)
+                await bot_manager.connect_and_wait()
+            except Exception as e:
+                logger.warning(f"[BOT] Connection failed: {e} (continuing anyway)")
+                bot_manager = None
 
         # Initialize components
         state = StateManager(Path("data/processed_news.json"))
@@ -267,7 +271,7 @@ Next attempt: 6 hours"""
 
     finally:
         # Disconnect bot at end of execution
-        if bot_manager:
+        if 'bot_manager' in locals() and bot_manager:
             try:
                 await bot_manager.disconnect()
             except Exception as e:

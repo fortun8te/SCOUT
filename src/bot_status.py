@@ -19,17 +19,25 @@ class BotStatusManager:
         """Connect bot and keep DND status during execution"""
         try:
             intents = Intents.default()
+            intents.message_content = False
+            intents.guilds = False
+            intents.members = False
             self.client = Client(intents=intents)
 
             @self.client.event
             async def on_ready():
-                await self.client.change_presence(status=Status.dnd)
-                logger.info("[BOT] Connected - Status: DND")
-                self.ready = True
+                try:
+                    await self.client.change_presence(status=Status.dnd)
+                    logger.info("[BOT] Online - Status: DND")
+                    self.ready = True
+                except Exception as e:
+                    logger.error(f"[BOT] Failed to set status: {e}")
 
-            # Start the bot in background
+            # Start the bot - will reconnect if connection drops
             await self.client.start(self.bot_token)
 
+        except asyncio.CancelledError:
+            logger.info("[BOT] Connection cancelled")
         except Exception as e:
             logger.error(f"Bot status error: {e}")
 
@@ -55,8 +63,9 @@ class BotStatusManager:
     async def disconnect(self):
         """Disconnect bot cleanly"""
         try:
-            if self.client:
+            if self.client and self.client.ws:
                 await self.client.close()
                 logger.info("[BOT] Disconnected")
+            self.ready = False
         except Exception as e:
-            logger.error(f"Failed to disconnect bot: {e}")
+            logger.warning(f"Disconnect error: {e}")
