@@ -43,9 +43,9 @@ class QualityChecker:
     ]
 
     # Minimum quality thresholds
-    MIN_TITLE_LENGTH = 20
-    MAX_TITLE_LENGTH = 200
-    MIN_RELEVANCE_SCORE = 0.25  # Matches filter threshold
+    MIN_TITLE_LENGTH = 10  # Very lenient
+    MAX_TITLE_LENGTH = 300  # Allow longer titles
+    MIN_RELEVANCE_SCORE = 0.10  # Very low threshold
 
     def check_quality(self, article: Dict) -> tuple[bool, str]:
         """

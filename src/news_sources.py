@@ -32,6 +32,8 @@ class NewsSourceAggregator:
             self._fetch_hackernews(),
             self._fetch_arxiv(),
             self._fetch_reddit(),
+            self._fetch_lobsters(),
+            self._fetch_techcrunch(),
         ]
 
         # Add optional sources if API keys provided
@@ -47,10 +49,12 @@ class NewsSourceAggregator:
             ("HackerNews", results[0]),
             ("ArXiv", results[1]),
             ("Reddit", results[2]),
+            ("Lobsters", results[3]),
+            ("TechCrunch", results[4]),
         ]
 
         if self.api_keys.get("newsapi_key"):
-            result_map.append(("NewsAPI", results[3]))
+            result_map.append(("NewsAPI", results[5]))
 
         for source_name, result in result_map:
             if isinstance(result, Exception):
@@ -239,6 +243,75 @@ class NewsSourceAggregator:
             return articles
         except Exception as e:
             logger.error(f"NewsAPI error: {e}")
+            return []
+
+    async def _fetch_lobsters(self) -> List[Dict]:
+        """Fetch from Lobsters (tech community site)"""
+        try:
+            response = self.session.get(
+                "https://lobste.rs/newest.json",
+                timeout=10
+            )
+            response.raise_for_status()
+            posts = response.json()
+
+            articles = []
+            for post in posts[:20]:
+                try:
+                    articles.append({
+                        "id": f"lobsters_{post['id']}",
+                        "title": post.get("title", ""),
+                        "url": post.get("url", ""),
+                        "source": "Lobsters",
+                        "published_at": datetime.fromisoformat(
+                            post.get("created_at", "").replace("Z", "+00:00")
+                        ) if post.get("created_at") else datetime.utcnow(),
+                        "engagement_score": post.get("score", 0),
+                        "is_recent": True
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse Lobsters post: {e}")
+                    continue
+            return articles
+        except Exception as e:
+            logger.warning(f"Lobsters error: {e}")
+            return []
+
+    async def _fetch_techcrunch(self) -> List[Dict]:
+        """Fetch from TechCrunch RSS via public API"""
+        try:
+            # Using TechCrunch search API
+            response = self.session.get(
+                "https://techcrunch.com/wp-json/wp/v2/posts",
+                params={
+                    "per_page": 20,
+                    "search": "AI OR artificial intelligence OR machine learning"
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            posts = response.json()
+
+            articles = []
+            for post in posts[:15]:
+                try:
+                    articles.append({
+                        "id": f"tc_{post['id']}",
+                        "title": post.get("title", {}).get("rendered", ""),
+                        "url": post.get("link", ""),
+                        "source": "TechCrunch",
+                        "published_at": datetime.fromisoformat(
+                            post.get("date", "").replace("Z", "+00:00")
+                        ) if post.get("date") else datetime.utcnow(),
+                        "engagement_score": 0,
+                        "is_recent": True
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse TechCrunch post: {e}")
+                    continue
+            return articles
+        except Exception as e:
+            logger.warning(f"TechCrunch error: {e}")
             return []
 
     async def _fetch_rss_feeds(self) -> List[Dict]:

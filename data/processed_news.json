@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-04-15T23:41:13.152689Z",
+  "last_run": "2026-04-15T23:51:25.900569Z",
   "processed_articles": {
     "gh_1201173969": {
       "title": "caveman: \ud83e\udea8 why use many token when few token do trick \u2014 Claude Code skill that cuts 65% o",
@@ -301,16 +301,130 @@
       "source": "GitHub Trending",
       "processed_at": "2026-04-15T23:41:13.152609Z",
       "score": 0.35
+    },
+    "tc_3049717": {
+      "title": "Neon, the No. 2 social app on the Apple App Store, pays users to record their phone calls and sells data to AI firms",
+      "url": "https://techcrunch.com/2025/09/24/neon-the-no-2-social-app-on-the-apple-app-store-pays-users-to-record-their-phone-calls-and-sells-data-to-ai-firms/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900422Z",
+      "score": 0.3833333333333333
+    },
+    "tc_3083089": {
+      "title": "OpenAI invests in Sam Altman\u2019s brain computer interface startup Merge Labs",
+      "url": "https://techcrunch.com/2026/01/15/openai-invests-in-sam-altmans-brain-computer-interface-startup-merge-labs/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900435Z",
+      "score": 0.37
+    },
+    "tc_3081727": {
+      "title": "Converge Bio raises $25M, backed by Bessemer and execs from Meta, OpenAI, Wiz",
+      "url": "https://techcrunch.com/2026/01/13/ai-drug-discovery-startup-converge-bio-pulls-in-25m-from-bessemer-and-execs-from-meta-openai-and-wiz/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900437Z",
+      "score": 0.37
+    },
+    "hn_46562867": {
+      "title": "MIT Non-AI License",
+      "url": "",
+      "source": "HackerNews",
+      "processed_at": "2026-04-15T23:51:25.900440Z",
+      "score": 0.35
+    },
+    "tc_3084660": {
+      "title": "Irony alert: Hallucinated citations found in papers from NeurIPS, the prestigious AI conference",
+      "url": "https://techcrunch.com/2026/01/21/irony-alert-hallucinated-citations-found-in-papers-from-neurips-the-prestigious-ai-conference/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900444Z",
+      "score": 0.35
+    },
+    "tc_3061337": {
+      "title": "TechCrunch Disrupt 2025 Side Events schedule:  Women in Tech, MongoDB, Silkroad Innovation Hub, and more to host",
+      "url": "https://techcrunch.com/2025/10/24/techcrunch-disrupt-2025-side-events-schedule-women-in-tech-mongodb-silkroad-innovation-hub-and-more-to-host/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900446Z",
+      "score": 0.35
+    },
+    "tc_3054118": {
+      "title": "Sources: Naveen Rao\u2019s new AI hardware startup targets $5B valuation with backing from a16z\u00a0",
+      "url": "https://techcrunch.com/2025/10/03/sources-naveen-raos-new-ai-hardware-startup-targets-5b-valuation-with-backing-from-a16z/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900447Z",
+      "score": 0.35
+    },
+    "tc_3047694": {
+      "title": "Meet the latest VC judges joining Startup Battlefield 200 at TechCrunch Disrupt 2025\u00a0",
+      "url": "https://techcrunch.com/2025/09/19/meet-the-latest-vc-judges-joining-startup-battlefield-200-at-techcrunch-disrupt-2025/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900449Z",
+      "score": 0.35
+    },
+    "tc_3026769": {
+      "title": "Where AI meets design: Runway co-founder Alejandro Matamala Ortiz takes the AI Stage at TechCrunch Disrupt 2025",
+      "url": "https://techcrunch.com/2025/07/10/where-ai-meets-design-runway-co-founder-alejandro-matamala-ortiz-takes-the-ai-stage-at-techcrunch-disrupt-2025/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900452Z",
+      "score": 0.35
+    },
+    "tc_3033326": {
+      "title": "Inside OpenAI\u2019s quest to make AI do anything for you",
+      "url": "https://techcrunch.com/2025/08/03/inside-openais-quest-to-make-ai-do-anything-for-you/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900454Z",
+      "score": 0.33999999999999997
+    },
+    "tc_2973217": {
+      "title": "From LLMs to hallucinations, here&#8217;s a simple guide to common AI terms",
+      "url": "https://techcrunch.com/2026/04/12/artificial-intelligence-definition-glossary-hallucinations-guide-to-common-ai-terms/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900456Z",
+      "score": 0.32999999999999996
+    },
+    "tc_3090063": {
+      "title": "The Washington Post is retreating from Silicon Valley when it matters most",
+      "url": "https://techcrunch.com/2026/02/05/the-washington-post-is-retreating-from-silicon-valley-when-it-matters-most/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900457Z",
+      "score": 0.32999999999999996
+    },
+    "tc_3059027": {
+      "title": "WhatsApp changes its terms to bar general-purpose chatbots from its platform",
+      "url": "https://techcrunch.com/2025/10/18/whatssapp-changes-its-terms-to-bar-general-purpose-chatbots-from-its-platform/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900459Z",
+      "score": 0.32999999999999996
+    },
+    "tc_3051176": {
+      "title": "Famed roboticist says humanoid robot bubble is doomed to burst",
+      "url": "https://techcrunch.com/2025/09/26/famed-roboticist-says-humanoid-robot-bubble-is-doomed-to-burst/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900460Z",
+      "score": 0.32999999999999996
+    },
+    "tc_3049567": {
+      "title": "Step into the future: The full AI Stage agenda at TechCrunch Disrupt 2025",
+      "url": "https://techcrunch.com/2025/09/24/step-into-the-future-the-full-ai-stage-agenda-at-techcrunch-disrupt-2025/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900462Z",
+      "score": 0.32999999999999996
+    },
+    "tc_3107381": {
+      "title": "Qodo raises $70M for code verification as AI coding scales",
+      "url": "https://techcrunch.com/2026/03/30/qodo-bets-on-code-verification-as-ai-coding-scales-raises-70m/",
+      "source": "TechCrunch",
+      "processed_at": "2026-04-15T23:51:25.900463Z",
+      "score": 0.3
     }
   },
-  "run_count": 4,
+  "run_count": 5,
   "statistics": {
-    "total_processed": 43,
-    "sent_today": 43,
+    "total_processed": 59,
+    "sent_today": 16,
     "sources_checked": [
       "HackerNews",
       "ArXiv",
       "Reddit",
+      "Lobsters",
+      "TechCrunch",
       "GitHub Trending"
     ]
   }
