@@ -62,10 +62,17 @@ class AnalyticsEngine:
         for source in sources:
             self.stats["top_sources"][source] = self.stats["top_sources"].get(source, 0) + 1
 
-        # Update trending keywords
+        # Update trending keywords (AI-specific)
+        ai_keywords = [
+            "gpt", "claude", "llm", "ai", "model", "neural", "transformer",
+            "diffusion", "vision", "multimodal", "reasoning", "reasoning model",
+            "rl", "fine-tun", "rag", "anthropic", "openai", "google",
+            "deepmind", "meta", "mistral", "o1", "gemini", "llama",
+            "breakthrough", "announced", "released", "leaked"
+        ]
         for article in articles:
             title = article.get("title", "").lower()
-            for keyword in ["gpt", "claude", "llm", "ai", "model", "neural", "transformer"]:
+            for keyword in ai_keywords:
                 if keyword in title:
                     self.stats["trending_keywords"][keyword] = \
                         self.stats["trending_keywords"].get(keyword, 0) + 1

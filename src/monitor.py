@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.news_sources import NewsSourceAggregator
 from src.filter import FilterEngine
 from src.state import StateManager
-from src.telegram_client import TelegramNotifier
+from src.discord_client import DiscordNotifier
 from src.bluesky_source import BlueskyJetstreamMonitor
 from src.summarizer import SummarizerEngine
 from src.analytics import AnalyticsEngine
@@ -160,10 +160,10 @@ async def main():
         analytics.record_run(len(all_articles), len(new_articles),
                            sources_checked, new_articles)
 
-        # Prepare Telegram notification
-        notifier = TelegramNotifier(
-            bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
-            chat_id=os.getenv("TELEGRAM_CHAT_ID", "")
+        # Prepare Discord notification
+        notifier = DiscordNotifier(
+            bot_token=os.getenv("DISCORD_BOT_TOKEN", ""),
+            channel_id=os.getenv("DISCORD_CHANNEL_ID", "")
         )
 
         if new_articles:
@@ -174,22 +174,28 @@ async def main():
                 f"{', '.join(f'{k}:{len(v)}' for k, v in categorized.items() if v)}"
             )
 
-            # Format and send digest
-            digest = notifier.format_digest(categorized)
-            logger.info("[TELEGRAM] Sending digest...")
-
-            if notifier.send_digest(digest):
-                logger.info(f"✓ Telegram notification sent with {len(new_articles)} articles")
+            # Format and send digest (prefer rich embeds)
+            logger.info("[DISCORD] Sending digest with rich embeds...")
+            if notifier.send_digest_embeds(categorized):
+                logger.info(f"Discord notification sent with {len(new_articles)} articles (embeds)")
             else:
-                logger.error("✗ Failed to send Telegram notification")
+                # Fallback to text format if embeds fail
+                logger.warning("Embed send failed, falling back to text format")
+                digest = notifier.format_digest(categorized)
+                if notifier.send_digest(digest):
+                    logger.info(f"Discord notification sent with {len(new_articles)} articles (text)")
+                else:
+                    logger.error("Failed to send Discord notification")
 
-            # Send analytics summary weekly (if run count is multiple of 28)
-            if state.state['run_count'] % 28 == 0:
+            # Send analytics summary (every 4 runs = daily if running 4x/day)
+            if state.state['run_count'] % 4 == 0:
                 analytics_summary = analytics.get_summary()
-                notifier.send_digest(analytics_summary)
-                logger.info("📊 Weekly analytics summary sent")
+                # Try to send as embed, fall back to text
+                if not notifier.send_analytics_embed(analytics.stats):
+                    notifier.send_digest(f"**Daily Analytics**\n\n{analytics_summary}")
+                logger.info("Daily analytics summary sent")
         else:
-            logger.info("ℹ️ No new articles to send this run")
+            logger.info("No new articles to send this run")
 
         # Save state
         state.save()
@@ -204,27 +210,25 @@ async def main():
         logger.info("=" * 70)
 
     except Exception as e:
-        logger.error(f"💥 CRITICAL ERROR: {e}", exc_info=True)
+        logger.error(f"CRITICAL ERROR: {e}", exc_info=True)
 
-        # Try to send comprehensive error alert to Telegram
+        # Try to send comprehensive error alert to Discord
         try:
-            notifier = TelegramNotifier(
-                bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
-                chat_id=os.getenv("TELEGRAM_CHAT_ID", "")
+            notifier = DiscordNotifier(
+                bot_token=os.getenv("DISCORD_BOT_TOKEN", ""),
+                channel_id=os.getenv("DISCORD_CHANNEL_ID", "")
             )
 
             # Include error context
-            error_msg = f"""
-💥 SCOUT Monitor Failed
+            error_msg = f"""SCOUT Monitor Failed
 
 Error: {str(e)[:150]}
 Time: {datetime.utcnow().isoformat()}Z
 
 Check logs at: claude.ai/code/routines
-Next attempt: 6 hours
-"""
+Next attempt: 6 hours"""
             notifier.send_error_alert(error_msg.strip())
-            logger.info("✓ Error alert sent to Telegram")
+            logger.info("Error alert sent to Discord")
 
         except Exception as alert_error:
             logger.error(f"Failed to send error alert: {alert_error}")
@@ -233,13 +237,7 @@ Next attempt: 6 hours
         logger.info("=" * 70)
         logger.error("MONITOR FAILED - Check logs above for details")
         logger.info("=" * 70)
-        # Don't raise - let Routine capture the error in its transcript
         exit(1)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
 
 
 if __name__ == "__main__":

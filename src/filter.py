@@ -166,7 +166,7 @@ class FilterEngine:
         return filtered
 
     def categorize(self, articles: List[Dict]) -> Dict[str, List[Dict]]:
-        """Categorize articles by content type"""
+        """Categorize articles by content type with smart breaking news detection"""
         categories = {
             "models": [],
             "breaking": [],
@@ -175,17 +175,35 @@ class FilterEngine:
             "other": []
         }
 
+        # Breaking news patterns (high priority)
+        breaking_patterns = [
+            r"GPT-[5-9]", r"Claude [4-9]", r"o1", r"o3", r"gemini [3-9]",
+            r"announce.*available", r"just released", r"now available",
+            r"exclusive.*announcement", r"official.*launch",
+            r"Anthropic announces", r"OpenAI announces", r"Google announces",
+            r"breakthrough", r"game-changing", r"revolutionary"
+        ]
+
         for article in articles:
             title = article.get("title", "").lower()
+            score = article.get("relevance_score", 0)
 
-            if any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["model_release"]["patterns"]):
+            # High-priority breaking news (score + keywords)
+            if score > 0.85 and any(re.search(p, title, re.IGNORECASE) for p in breaking_patterns):
+                categories["breaking"].append(article)
+            # Model releases
+            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["model_release"]["patterns"]):
                 categories["models"].append(article)
+            # Leaks and rumors
             elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["leaks"]["patterns"]):
                 categories["breaking"].append(article)
+            # Research papers
             elif article.get("source") == "ArXiv":
                 categories["research"].append(article)
+            # Technical methods
             elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["method"]["patterns"]):
                 categories["technical"].append(article)
+            # Everything else
             else:
                 categories["other"].append(article)
 
