@@ -70,17 +70,25 @@ class AdditionalSources:
 
             articles = []
             for article in response.json()[:15]:
-                articles.append({
-                    "id": f"devto_{article.get('id')}",
-                    "title": article.get("title", ""),
-                    "url": article.get("url", ""),
-                    "source": "Dev.to",
-                    "published_at": datetime.fromisoformat(
-                        article.get("published_at", "").replace("Z", "+00:00")
-                    ),
-                    "engagement_score": article.get("positive_reactions_count", 0),
-                    "is_recent": True
-                })
+                try:
+                    pub_date = article.get("published_at", "")
+                    if pub_date:
+                        published_at = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
+                    else:
+                        published_at = datetime.utcnow()
+
+                    articles.append({
+                        "id": f"devto_{article.get('id')}",
+                        "title": article.get("title", ""),
+                        "url": article.get("url", ""),
+                        "source": "Dev.to",
+                        "published_at": published_at,
+                        "engagement_score": article.get("positive_reactions_count", 0),
+                        "is_recent": True
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse Dev.to article: {e}")
+                    continue
 
             return articles
         except Exception as e:
@@ -106,17 +114,25 @@ class AdditionalSources:
 
             articles = []
             for repo in response.json().get("items", [])[:15]:
-                articles.append({
-                    "id": f"gh_{repo['id']}",
-                    "title": f"{repo['name']}: {repo.get('description', '')[:80]}",
-                    "url": repo["html_url"],
-                    "source": "GitHub Trending",
-                    "published_at": datetime.fromisoformat(
-                        repo["created_at"].replace("Z", "+00:00")
-                    ),
-                    "engagement_score": repo["stargazers_count"],
-                    "is_recent": True
-                })
+                try:
+                    created_at = repo.get("created_at", "")
+                    if created_at:
+                        published_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                    else:
+                        published_at = datetime.utcnow()
+
+                    articles.append({
+                        "id": f"gh_{repo['id']}",
+                        "title": f"{repo['name']}: {repo.get('description', '')[:80]}",
+                        "url": repo["html_url"],
+                        "source": "GitHub Trending",
+                        "published_at": published_at,
+                        "engagement_score": repo["stargazers_count"],
+                        "is_recent": True
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse GitHub repo: {e}")
+                    continue
 
             return articles
         except Exception as e:

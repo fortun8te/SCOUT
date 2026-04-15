@@ -18,10 +18,11 @@ class NewsSourceAggregator:
         self.api_keys = api_keys or {}
         self.session = requests.Session()
 
-    async def fetch_all(self) -> List[Dict]:
+    async def fetch_all(self):
         """
         Fetch from all sources in PARALLEL for 2x speed
         Uses asyncio.gather to batch all API calls
+        Returns: (all_articles, sources_checked)
         """
         all_articles = []
         sources_checked = []
@@ -38,7 +39,7 @@ class NewsSourceAggregator:
             tasks.append(self._fetch_newsapi())
 
         # Run all fetches in parallel
-        logger.info("[PARALLEL] Starting 5-source fetch in parallel...")
+        logger.info("[PARALLEL] Starting parallel fetch from all sources...")
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Process results
@@ -73,35 +74,44 @@ class NewsSourceAggregator:
                     "query": "AI OR artificial intelligence OR machine learning",
                     "tags": "story",
                     "numericFilters": "points>10",
-                    "hitsPerPage": 30,
-                    "sortBy": "byDate"
+                    "hitsPerPage": 30
                 },
                 timeout=10
             )
+
+            # Handle service unavailable gracefully
+            if response.status_code == 503:
+                logger.warning(f"HackerNews API temporarily unavailable (503)")
+                return []
+
             response.raise_for_status()
             hits = response.json().get("hits", [])
 
             articles = []
             for hit in hits:
-                articles.append({
-                    "id": f"hn_{hit['objectID']}",
-                    "title": hit.get("title", ""),
-                    "url": hit.get("url", ""),
-                    "source": "HackerNews",
-                    "published_at": datetime.fromisoformat(hit.get("created_at", "").replace("Z", "+00:00")),
-                    "engagement_score": hit.get("points", 0),
-                    "is_recent": True
-                })
+                try:
+                    articles.append({
+                        "id": f"hn_{hit['objectID']}",
+                        "title": hit.get("title", ""),
+                        "url": hit.get("url", ""),
+                        "source": "HackerNews",
+                        "published_at": datetime.fromisoformat(hit.get("created_at", "").replace("Z", "+00:00")),
+                        "engagement_score": hit.get("points", 0),
+                        "is_recent": True
+                    })
+                except Exception as article_error:
+                    logger.debug(f"Failed to parse HN article: {article_error}")
+                    continue
             return articles
         except Exception as e:
-            logger.error(f"HackerNews error: {e}")
+            logger.warning(f"HackerNews error: {e}")
             return []
 
     async def _fetch_arxiv(self) -> List[Dict]:
         """Fetch recent AI papers from ArXiv via HTTP API"""
         try:
             response = self.session.get(
-                "http://export.arxiv.org/api/query",
+                "https://export.arxiv.org/api/query",
                 params={
                     "search_query": "cat:cs.AI OR cat:cs.CL OR cat:cs.LG",
                     "start": 0,
@@ -111,6 +121,12 @@ class NewsSourceAggregator:
                 },
                 timeout=15
             )
+
+            # Handle service unavailable gracefully
+            if response.status_code == 503:
+                logger.warning(f"ArXiv API temporarily unavailable (503)")
+                return []
+
             response.raise_for_status()
 
             # Parse XML response
@@ -121,26 +137,30 @@ class NewsSourceAggregator:
             ns = {"atom": "http://www.w3.org/2005/Atom"}
 
             for entry in root.findall("atom:entry", ns):
-                title_elem = entry.find("atom:title", ns)
-                id_elem = entry.find("atom:id", ns)
-                published_elem = entry.find("atom:published", ns)
+                try:
+                    title_elem = entry.find("atom:title", ns)
+                    id_elem = entry.find("atom:id", ns)
+                    published_elem = entry.find("atom:published", ns)
 
-                if title_elem is not None and id_elem is not None:
-                    arxiv_id = id_elem.text.split("/abs/")[-1]
-                    articles.append({
-                        "id": f"arxiv_{arxiv_id}",
-                        "title": title_elem.text.replace("\n", " ").strip(),
-                        "url": f"https://arxiv.org/abs/{arxiv_id}",
-                        "source": "ArXiv",
-                        "published_at": datetime.fromisoformat(
-                            published_elem.text.replace("Z", "+00:00")
-                        ) if published_elem is not None else datetime.utcnow(),
-                        "engagement_score": 0,
-                        "is_recent": True
-                    })
+                    if title_elem is not None and id_elem is not None:
+                        arxiv_id = id_elem.text.split("/abs/")[-1]
+                        articles.append({
+                            "id": f"arxiv_{arxiv_id}",
+                            "title": title_elem.text.replace("\n", " ").strip(),
+                            "url": f"https://arxiv.org/abs/{arxiv_id}",
+                            "source": "ArXiv",
+                            "published_at": datetime.fromisoformat(
+                                published_elem.text.replace("Z", "+00:00")
+                            ) if published_elem is not None else datetime.utcnow(),
+                            "engagement_score": 0,
+                            "is_recent": True
+                        })
+                except Exception as article_error:
+                    logger.debug(f"Failed to parse ArXiv article: {article_error}")
+                    continue
             return articles
         except Exception as e:
-            logger.error(f"ArXiv error: {e}")
+            logger.warning(f"ArXiv error: {e}")
             return []
 
     async def _fetch_reddit(self) -> List[Dict]:
@@ -151,10 +171,15 @@ class NewsSourceAggregator:
 
             for sub in subreddits:
                 try:
+                    # Reddit requires specific User-Agent and headers
+                    headers = {
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    }
                     response = self.session.get(
                         f"https://www.reddit.com/r/{sub}/new.json",
-                        headers={"User-Agent": "AINewsBot/1.0"},
-                        timeout=10
+                        headers=headers,
+                        timeout=10,
+                        allow_redirects=True
                     )
                     response.raise_for_status()
                     posts = response.json().get("data", {}).get("children", [])

@@ -58,23 +58,35 @@ class BlueskyJetstreamMonitor:
                         posts = data.get("posts", [])
 
                         for post in posts:
-                            record = post.get("record", {})
-                            author = post.get("author", {})
+                            try:
+                                record = post.get("record", {})
+                                author = post.get("author", {})
 
-                            articles.append({
-                                "id": f"bluesky_{post['uri']}",
-                                "title": record.get("text", "")[:100],
-                                "url": f"https://bsky.app/profile/{author.get('handle', '')}/post/{post['uri'].split('/')[-1]}",
-                                "source": f"Bluesky (@{author.get('handle', 'unknown')})",
-                                "published_at": datetime.fromisoformat(
-                                    record.get("createdAt", "").replace("Z", "+00:00")
-                                ),
-                                "engagement_score": post.get("likeCount", 0) +
-                                                   post.get("replyCount", 0) +
-                                                   post.get("repostCount", 0),
-                                "is_recent": True,
-                                "content": record.get("text", "")
-                            })
+                                # Skip if missing critical fields
+                                if not record.get("text") or not author.get("handle"):
+                                    continue
+
+                                created_at = record.get("createdAt", "")
+                                if created_at:
+                                    published_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                                else:
+                                    published_at = datetime.utcnow()
+
+                                articles.append({
+                                    "id": f"bluesky_{post['uri']}",
+                                    "title": record.get("text", "")[:100],
+                                    "url": f"https://bsky.app/profile/{author.get('handle', '')}/post/{post['uri'].split('/')[-1]}",
+                                    "source": f"Bluesky (@{author.get('handle', 'unknown')})",
+                                    "published_at": published_at,
+                                    "engagement_score": post.get("likeCount", 0) +
+                                                       post.get("replyCount", 0) +
+                                                       post.get("repostCount", 0),
+                                    "is_recent": True,
+                                    "content": record.get("text", "")
+                                })
+                            except Exception as e:
+                                logger.debug(f"Failed to parse Bluesky post: {e}")
+                                continue
 
                         logger.info(f"Fetched {len(articles)} posts from Bluesky")
                         return articles

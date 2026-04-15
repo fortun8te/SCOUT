@@ -45,7 +45,7 @@ class QualityChecker:
     # Minimum quality thresholds
     MIN_TITLE_LENGTH = 20
     MAX_TITLE_LENGTH = 200
-    MIN_RELEVANCE_SCORE = 0.60  # Increased from 0.50
+    MIN_RELEVANCE_SCORE = 0.25  # Matches filter threshold
 
     def check_quality(self, article: Dict) -> tuple[bool, str]:
         """
@@ -84,10 +84,12 @@ class QualityChecker:
             if bad_source in url:
                 return False, f"Low-quality source: {bad_source}"
 
-        # Check 6: Content exists
+        # Check 6: Content exists (optional - only if article has content field)
+        # Don't require content since not all sources provide it
         content = article.get("content", "") or article.get("summary", "")
-        if not content or len(content) < 50:
-            return False, "Insufficient content"
+        # Only check if content is present (don't reject if missing)
+        # if not content or len(content) < 50:
+        #     return False, "Insufficient content"
 
         # Check 7: Duplicate/near-duplicate with previous
         # (already handled by deduplicator)

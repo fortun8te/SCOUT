@@ -1,0 +1,83 @@
+{
+  "total_articles_processed": 172,
+  "total_articles_sent": 43,
+  "runs": [
+    {
+      "timestamp": "2026-04-15T23:40:25.682040Z",
+      "articles_fetched": 40,
+      "articles_sent": 0,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.0
+    },
+    {
+      "timestamp": "2026-04-15T23:40:48.495643Z",
+      "articles_fetched": 44,
+      "articles_sent": 0,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.0
+    },
+    {
+      "timestamp": "2026-04-15T23:40:59.685302Z",
+      "articles_fetched": 44,
+      "articles_sent": 0,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.0
+    },
+    {
+      "timestamp": "2026-04-15T23:41:13.152697Z",
+      "articles_fetched": 44,
+      "articles_sent": 43,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.9772727272727273
+    }
+  ],
+  "top_sources": {
+    "HackerNews": 4,
+    "ArXiv": 4,
+    "Reddit": 4,
+    "GitHub Trending": 4
+  },
+  "trending_keywords": {
+    "claude": 3,
+    "ai": 11,
+    "gemini": 1,
+    "model": 10,
+    "vision": 1,
+    "multimodal": 1,
+    "fine-tun": 1,
+    "reasoning": 1,
+    "reasoning model": 1,
+    "rag": 2,
+    "llm": 4,
+    "meta": 2,
+    "rl": 1,
+    "diffusion": 2,
+    "google": 1,
+    "neural": 1
+  },
+  "category_distribution": {},
+  "hourly_distribution": {
+    "hour_23": 4
+  },
+  "discovery_rate": 0
+}

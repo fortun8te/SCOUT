@@ -145,8 +145,8 @@ async def main():
             f"near-duplicates"
         )
 
-        # Filter and rank articles
-        filter_engine = FilterEngine(threshold=0.5)
+        # Filter and rank articles (lower threshold to be less aggressive)
+        filter_engine = FilterEngine(threshold=0.25)
         filtered_articles = filter_engine.filter_and_rank(deduplicated)
         logger.info(
             f"[FILTER] ✓ Filtered to {len(filtered_articles)} "
