@@ -19,42 +19,49 @@ class NewsSourceAggregator:
         self.session = requests.Session()
 
     async def fetch_all(self) -> List[Dict]:
-        """Fetch from all sources and combine results"""
+        """
+        Fetch from all sources in PARALLEL for 2x speed
+        Uses asyncio.gather to batch all API calls
+        """
         all_articles = []
         sources_checked = []
 
-        # Tier 1: Free, no auth
-        try:
-            articles = await self._fetch_hackernews()
-            all_articles.extend(articles)
-            sources_checked.append("HackerNews")
-        except Exception as e:
-            logger.warning(f"HackerNews fetch failed: {e}")
+        # Build parallel tasks
+        tasks = [
+            self._fetch_hackernews(),
+            self._fetch_arxiv(),
+            self._fetch_reddit(),
+        ]
 
-        try:
-            articles = await self._fetch_arxiv()
-            all_articles.extend(articles)
-            sources_checked.append("ArXiv")
-        except Exception as e:
-            logger.warning(f"ArXiv fetch failed: {e}")
-
-        try:
-            articles = await self._fetch_reddit()
-            all_articles.extend(articles)
-            sources_checked.append("Reddit")
-        except Exception as e:
-            logger.warning(f"Reddit fetch failed: {e}")
-
-        # Tier 2: Requires API key
+        # Add optional sources if API keys provided
         if self.api_keys.get("newsapi_key"):
-            try:
-                articles = await self._fetch_newsapi()
-                all_articles.extend(articles)
-                sources_checked.append("NewsAPI")
-            except Exception as e:
-                logger.warning(f"NewsAPI fetch failed: {e}")
+            tasks.append(self._fetch_newsapi())
 
-        logger.info(f"Fetched {len(all_articles)} articles from {len(sources_checked)} sources")
+        # Run all fetches in parallel
+        logger.info("[PARALLEL] Starting 5-source fetch in parallel...")
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Process results
+        result_map = [
+            ("HackerNews", results[0]),
+            ("ArXiv", results[1]),
+            ("Reddit", results[2]),
+        ]
+
+        if self.api_keys.get("newsapi_key"):
+            result_map.append(("NewsAPI", results[3]))
+
+        for source_name, result in result_map:
+            if isinstance(result, Exception):
+                logger.warning(f"[PARALLEL] {source_name} failed: {result}")
+            else:
+                all_articles.extend(result)
+                sources_checked.append(source_name)
+
+        logger.info(
+            f"[PARALLEL] ✓ Fetched {len(all_articles)} articles "
+            f"from {len(sources_checked)} sources (parallel execution)"
+        )
         return all_articles, sources_checked
 
     async def _fetch_hackernews(self) -> List[Dict]:

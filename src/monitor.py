@@ -26,6 +26,8 @@ from src.telegram_client import TelegramNotifier
 from src.bluesky_source import BlueskyJetstreamMonitor
 from src.summarizer import SummarizerEngine
 from src.analytics import AnalyticsEngine
+from src.deduplicator import DeduplicatorEngine
+from src.retry_handler import RetryHandler
 
 # Configure logging
 logging.basicConfig(
@@ -80,15 +82,24 @@ async def main():
         else:
             logger.info("[SUMMARY] Summarization disabled (no GEMINI_API_KEY)")
 
-        # Fetch news from all sources (with Bluesky included)
-        logger.info("[FETCH] Starting news collection from all sources...")
+        # Initialize deduplicator and retry handler
+        deduplicator = DeduplicatorEngine(similarity_threshold=0.85)
+        retrier = RetryHandler(max_retries=3, base_delay=1.0)
+        logger.info("[DEDUP] Semantic deduplicator initialized")
+        logger.info("[RETRY] Exponential backoff retry enabled (3 attempts)")
+
+        # Fetch news from all sources in PARALLEL
+        logger.info("[FETCH] 🚀 Starting PARALLEL news fetch from all sources...")
         all_articles, sources_checked = await sources.fetch_all()
 
-        # Add Bluesky articles (real-time)
-        logger.info("[BLUESKY] Fetching recent Bluesky posts...")
-        bluesky_articles = await bluesky.fetch_recent_posts()
+        # Add Bluesky articles (real-time) with retry
+        logger.info("[BLUESKY] Fetching recent Bluesky posts (with retry)...")
+        bluesky_articles = await retrier.execute_with_retry(
+            bluesky.fetch_recent_posts
+        ) or []
         all_articles.extend(bluesky_articles)
-        sources_checked.append("Bluesky")
+        if bluesky_articles:
+            sources_checked.append("Bluesky")
 
         logger.info(
             f"[FETCH] ✓ Fetched {len(all_articles)} total articles "
@@ -99,17 +110,25 @@ async def main():
             logger.warning("⚠️ No articles fetched from any source")
             return
 
+        # Semantic deduplication (remove near-duplicates from same batch)
+        logger.info("[DEDUP-BATCH] Running semantic deduplication...")
+        deduplicated = deduplicator.find_duplicates(all_articles)
+        logger.info(
+            f"[DEDUP-BATCH] ✓ Removed {len(all_articles) - len(deduplicated)} "
+            f"near-duplicates"
+        )
+
         # Filter and rank articles
         filter_engine = FilterEngine(threshold=0.5)
-        filtered_articles = filter_engine.filter_and_rank(all_articles)
+        filtered_articles = filter_engine.filter_and_rank(deduplicated)
         logger.info(
             f"[FILTER] ✓ Filtered to {len(filtered_articles)} "
             f"high-quality articles"
         )
 
-        # Get new articles (not processed before)
+        # Get new articles (not processed before, with state dedup)
         new_articles = state.get_new_articles(filtered_articles)
-        logger.info(f"[DEDUP] ✓ Found {len(new_articles)} new articles to send")
+        logger.info(f"[DEDUP-STATE] ✓ Found {len(new_articles)} new articles to send")
 
         # Add summaries if enabled
         if summarizer.enabled and new_articles:
@@ -173,17 +192,35 @@ async def main():
     except Exception as e:
         logger.error(f"💥 CRITICAL ERROR: {e}", exc_info=True)
 
-        # Try to send error alert
+        # Try to send comprehensive error alert to Telegram
         try:
             notifier = TelegramNotifier(
                 bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
                 chat_id=os.getenv("TELEGRAM_CHAT_ID", "")
             )
-            notifier.send_error_alert(f"Monitor failed: {str(e)[:200]}")
+
+            # Include error context
+            error_msg = f"""
+💥 SCOUT Monitor Failed
+
+Error: {str(e)[:150]}
+Time: {datetime.utcnow().isoformat()}Z
+
+Check logs at: claude.ai/code/routines
+Next attempt: 6 hours
+"""
+            notifier.send_error_alert(error_msg.strip())
+            logger.info("✓ Error alert sent to Telegram")
+
         except Exception as alert_error:
             logger.error(f"Failed to send error alert: {alert_error}")
 
-        raise
+        # In cloud environment, exit cleanly (let Routine see error in logs)
+        logger.info("=" * 70)
+        logger.error("MONITOR FAILED - Check logs above for details")
+        logger.info("=" * 70)
+        # Don't raise - let Routine capture the error in its transcript
+        exit(1)
 
 
 if __name__ == "__main__":
