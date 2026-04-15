@@ -119,19 +119,13 @@ class DiscordNotifier:
             embeds = []
 
             # Create header embed
+            total_articles = sum(len(v) for v in articles_by_category.values())
             header_embed = {
-                "title": "🤖 AI News Update",
-                "description": f"Latest AI news digest • {datetime.now().strftime('%Y-%m-%d %H:%M')} UTC",
+                "title": "AI News Update",
+                "description": f"{total_articles} stories from today",
                 "color": 0x1f77b4,
                 "fields": []
             }
-
-            total_articles = sum(len(v) for v in articles_by_category.values())
-            header_embed["fields"].append({
-                "name": "Stories",
-                "value": str(total_articles),
-                "inline": True
-            })
 
             for category in articles_by_category:
                 if articles_by_category[category]:
@@ -144,46 +138,44 @@ class DiscordNotifier:
             embeds.append(header_embed)
 
             # Create embeds for each article (max 10 per category)
-            category_names = {
-                "models": "🚀 NEW MODELS",
-                "breaking": "🚨 BREAKING",
-                "research": "📚 RESEARCH",
-                "technical": "⚙️ TECHNICAL",
-                "other": "📰 OTHER"
-            }
-
             article_count = 0
             for category, articles in articles_by_category.items():
                 if not articles or article_count >= 25:  # Max 25 articles across embeds
                     continue
 
                 cat_color = self.CATEGORY_COLORS.get(category, 0x606060)
-                cat_name = category_names.get(category, "OTHER")
 
                 for article in articles[:5]:  # Max 5 per category
                     if article_count >= 25:
                         break
 
+                    title = article.get("title", "No title")[:256]
+                    url = article.get("url", "")
+                    source = article.get("source", "Unknown")
+                    score = article.get("relevance_score", 0)
+
                     embed = {
-                        "title": article.get("title", "No title")[:256],
-                        "url": article.get("url", ""),
+                        "title": title,
+                        "url": url,
                         "color": cat_color,
-                        "fields": []
+                        "fields": [
+                            {
+                                "name": "Source",
+                                "value": source,
+                                "inline": True
+                            },
+                            {
+                                "name": "Relevance",
+                                "value": f"{score:.0%}",
+                                "inline": True
+                            }
+                        ]
                     }
 
                     # Add summary if available
                     summary = article.get("summary", "")
                     if summary:
-                        embed["description"] = summary[:200]
-
-                    # Add source and score
-                    source = article.get("source", "Unknown")
-                    score = article.get("relevance_score", 0)
-                    embed["fields"].append({
-                        "name": f"Source • Relevance",
-                        "value": f"{source} • {score:.0%}",
-                        "inline": False
-                    })
+                        embed["description"] = summary[:150].strip()
 
                     embeds.append(embed)
                     article_count += 1
@@ -225,21 +217,28 @@ class DiscordNotifier:
                 logger.error("Cannot send breaking alert: Discord API URL not initialized")
                 return False
 
-            embed = {
-                "title": f"🚨 BREAKING: {article.get('title', 'Breaking News')[:200]}",
-                "url": article.get("url", ""),
-                "color": 0xff006e,  # Red for breaking
-                "fields": []
-            }
-
-            # Add source and timestamp
+            title = article.get('title', 'Breaking News')[:200]
             source = article.get("source", "Unknown")
             score = article.get("relevance_score", 0)
-            embed["fields"].append({
-                "name": "Source • Relevance",
-                "value": f"{source} • {score:.0%}",
-                "inline": False
-            })
+            url = article.get("url", "")
+
+            embed = {
+                "title": title,
+                "url": url,
+                "color": 0xff006e,
+                "fields": [
+                    {
+                        "name": "Source",
+                        "value": source,
+                        "inline": True
+                    },
+                    {
+                        "name": "Relevance",
+                        "value": f"{score:.0%}",
+                        "inline": True
+                    }
+                ]
+            }
 
             payload = {
                 "embeds": [embed]
@@ -276,7 +275,7 @@ class DiscordNotifier:
                 return False
 
             embed = {
-                "title": "⚠️ SCOUT Monitor Error",
+                "title": "SCOUT Monitor Error",
                 "description": error_message[:2048],
                 "color": 0xff6b6b,
                 "fields": [{
@@ -311,20 +310,11 @@ class DiscordNotifier:
     def format_digest(self, articles_by_category: Dict[str, List[Dict]]) -> str:
         """Format articles for Discord text fallback"""
         lines = []
-        lines.append("🤖 **AI News Update**")
-        lines.append("")
+        lines.append("AI News Update")
+        lines.append("=" * 40)
 
         total_articles = sum(len(v) for v in articles_by_category.values())
-        lines.append(f"**{total_articles} stories**")
-        lines.append("")
-
-        category_names = {
-            "models": "🚀 NEW MODELS",
-            "breaking": "🚨 BREAKING",
-            "research": "📚 RESEARCH",
-            "technical": "⚙️ TECHNICAL",
-            "other": "📰 OTHER"
-        }
+        lines.append(f"{total_articles} stories\n")
 
         article_num = 1
 
@@ -332,22 +322,20 @@ class DiscordNotifier:
             if not articles:
                 continue
 
-            cat_name = category_names.get(category, "OTHER")
-            lines.append(f"**{cat_name}** ({len(articles)})")
-            lines.append("")
+            lines.append(f"{category.upper()} ({len(articles)})")
+            lines.append("-" * 40)
 
             for article in articles[:5]:
-                title = article.get("title", "No title")[:75]
+                title = article.get("title", "No title")[:100]
                 score = article.get("relevance_score", 0)
                 source = article.get("source", "Unknown")
-                url = article.get("url", "")
 
-                lines.append(f"{article_num}. **{title}**")
-                lines.append(f"   {source} · {score:.0%} · {url[:50]}...")
+                lines.append(f"{article_num}. {title}")
+                lines.append(f"   {source} | {score:.0%}")
                 lines.append("")
                 article_num += 1
 
-        lines.append("---")
+        lines.append("=" * 40)
         lines.append("Next update in 6 hours")
 
         return "\n".join(lines)
@@ -384,7 +372,7 @@ class DiscordNotifier:
                 trending_str = "None yet"
 
             embed = {
-                "title": "📊 SCOUT Daily Analytics",
+                "title": "SCOUT Daily Analytics",
                 "color": 0x1f77b4,
                 "fields": [
                     {
@@ -393,17 +381,17 @@ class DiscordNotifier:
                         "inline": True
                     },
                     {
-                        "name": "Articles Sent",
+                        "name": "Articles",
                         "value": str(total_sent),
                         "inline": True
                     },
                     {
-                        "name": "Avg Per Run",
+                        "name": "Avg/Run",
                         "value": f"{avg_per_run:.1f}",
                         "inline": True
                     },
                     {
-                        "name": "Discovery Rate",
+                        "name": "Discovery",
                         "value": f"{discovery_rate:.1%}",
                         "inline": True
                     },
@@ -413,14 +401,11 @@ class DiscordNotifier:
                         "inline": False
                     },
                     {
-                        "name": "Trending Keywords",
+                        "name": "Trending",
                         "value": trending_str,
                         "inline": False
                     }
-                ],
-                "footer": {
-                    "text": f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}"
-                }
+                ]
             }
 
             payload = {"embeds": [embed]}
