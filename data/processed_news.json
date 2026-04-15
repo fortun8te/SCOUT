@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-04-15T23:51:25.900569Z",
+  "last_run": "2026-04-15T23:53:27.999175Z",
   "processed_articles": {
     "gh_1201173969": {
       "title": "caveman: \ud83e\udea8 why use many token when few token do trick \u2014 Claude Code skill that cuts 65% o",
@@ -413,18 +413,183 @@
       "source": "TechCrunch",
       "processed_at": "2026-04-15T23:51:25.900463Z",
       "score": 0.3
+    },
+    "medium_6": {
+      "title": "Stop Guessing Staffing Needs: How I\u2019d Predict Daily Museum Visitors Before They Arrive (Part 2)",
+      "url": "https://medium.com/data-science-collective?source=topic_portal---recommended_stories---artificial_intelligence---1-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999039Z",
+      "score": 0.3
+    },
+    "medium_12": {
+      "title": "The Algorithmic Gaze: Why I Outsourced My Melancholy to a Server Farm in Northern Virginia",
+      "url": "https://medium.com/data-science-collective?source=topic_portal---recommended_stories---artificial_intelligence---4-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999051Z",
+      "score": 0.3
+    },
+    "medium_2": {
+      "title": "Synthetic Users Don\u2019t Have Bodies, Consent, or Consequences. That\u2019s the Problem.",
+      "url": "https://medium.com/design-bootcamp?source=topic_portal---recommended_stories---artificial_intelligence---0-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999053Z",
+      "score": 0.28
+    },
+    "medium_1": {
+      "title": "Recommended stories",
+      "url": "https://medium.com/design-bootcamp/synthetic-users-dont-have-bodies-consent-or-consequences-that-s-the-problem-cc3944c718cc",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999055Z",
+      "score": 0.25
+    },
+    "medium_3": {
+      "title": "In Pursuit of a Perfect CIRCLE",
+      "url": "https://medium.com/design-bootcamp?source=topic_portal---recommended_stories---artificial_intelligence---0-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999057Z",
+      "score": 0.25
+    },
+    "medium_4": {
+      "title": "The Case for Tasteful Software",
+      "url": "https://medium.com/data-science-collective/in-pursuit-of-a-perfect-circle-25c300ec6f3f",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999059Z",
+      "score": 0.25
+    },
+    "medium_5": {
+      "title": "Software Gets Personal: The Makers",
+      "url": "https://medium.com/data-science-collective?source=topic_portal---recommended_stories---artificial_intelligence---1-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999061Z",
+      "score": 0.25
+    },
+    "medium_13": {
+      "title": "Sometimes powerful people just do dumb shit",
+      "url": "https://medium.com/data-science-collective?source=topic_portal---recommended_stories---artificial_intelligence---4-107--------------------953f5ebc_b0ff_4ddd_84d5_9df040e5af06--------------",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999064Z",
+      "score": 0.25
+    },
+    "medium_14": {
+      "title": "Six Degrees of Everything",
+      "url": "https://medium.com/design-bootcamp/synthetic-users-dont-have-bodies-consent-or-consequences-that-s-the-problem-cc3944c718cc",
+      "source": "Medium",
+      "processed_at": "2026-04-15T23:53:27.999067Z",
+      "score": 0.25
+    },
+    "slashdot_11": {
+      "title": "Amazon Buys Globalstar For $10.8 Billion, Moving To Expand Its Satellite Internet Service",
+      "url": "https://entertainment.slashdot.org/story/26/04/14/2045226/sony-boss-urges-theaters-to-stop-30-minutes-of-trailers-and-ads-before-movies?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999069Z",
+      "score": 0.25
+    },
+    "slashdot_1": {
+      "title": "Boston Dynamics' Robot Dog Can Now Read Gauges, Spot Spills, and Reason",
+      "url": "https://slashdot.org/",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999071Z",
+      "score": 0.23
+    },
+    "slashdot_2": {
+      "title": "US Jobs Too Important To Risk Chinese Car Imports, Says Ford CEO",
+      "url": "https://hardware.slashdot.org/story/26/04/15/2143237/boston-dynamics-robot-dog-can-now-read-gauges-spot-spills-and-reason?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999073Z",
+      "score": 0.23
+    },
+    "slashdot_4": {
+      "title": "Live Nation Illegally Monopolized Ticketing Market, Jury Finds",
+      "url": "https://yro.slashdot.org/story/26/04/15/1913213/calcom-is-going-closed-source-because-of-ai?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999075Z",
+      "score": 0.23
+    },
+    "slashdot_5": {
+      "title": "Anna's Archive Loses $322 Million Spotify Piracy Case Without a Fight",
+      "url": "https://yro.slashdot.org/story/26/04/15/1937205/live-nation-illegally-monopolized-ticketing-market-jury-finds?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999077Z",
+      "score": 0.23
+    },
+    "slashdot_7": {
+      "title": "Struggling Shoe Retailer Allbirds Pivots To AI, Stock Explodes More Than 700%",
+      "url": "https://slashdot.org/story/26/04/15/1737249/snapchat-blames-ai-as-it-cuts-1000-jobs?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999079Z",
+      "score": 0.23
+    },
+    "slashdot_10": {
+      "title": "Sony Boss Urges Theaters To Stop 30 Minutes of Trailers and Ads Before Movies",
+      "url": "https://science.slashdot.org/story/26/04/15/076216/norway-man-cured-of-hiv-with-brothers-stem-cells?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999080Z",
+      "score": 0.23
+    },
+    "slashdot_12": {
+      "title": "Sony Is Removing Many Popular Features From Its Free OTA TV Options",
+      "url": "https://tech.slashdot.org/story/26/04/15/0642220/amazon-buys-globalstar-for-108-billion-moving-to-expand-its-satellite-internet-service?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999082Z",
+      "score": 0.23
+    },
+    "slashdot_3": {
+      "title": "Cal.com Is Going Closed Source Because of AI",
+      "url": "https://news.slashdot.org/story/26/04/15/1943246/us-jobs-too-important-to-risk-chinese-car-imports-says-ford-ceo?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999084Z",
+      "score": 0.2
+    },
+    "slashdot_6": {
+      "title": "Snapchat Blames AI As It Cuts 1,000 Jobs",
+      "url": "https://yro.slashdot.org/story/26/04/15/1831241/annas-archive-loses-322-million-spotify-piracy-case-without-a-fight?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999086Z",
+      "score": 0.2
+    },
+    "slashdot_8": {
+      "title": "Rivian's Illinois Factory Will Run On Recycled EV Batteries",
+      "url": "https://news.slashdot.org/story/26/04/15/1646259/struggling-shoe-retailer-allbirds-pivots-to-ai-stock-explodes-more-than-700?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999087Z",
+      "score": 0.2
+    },
+    "slashdot_9": {
+      "title": "Norway Man Cured of HIV With Brother's Stem Cells",
+      "url": "https://hardware.slashdot.org/story/26/04/15/0712256/rivians-illinois-factory-will-run-on-recycled-ev-batteries?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999089Z",
+      "score": 0.2
+    },
+    "slashdot_13": {
+      "title": "FCC Grants Netgear Conditional Approval For Routers",
+      "url": "https://entertainment.slashdot.org/story/26/04/14/2213204/sony-is-removing-many-popular-features-from-its-free-ota-tv-options?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999091Z",
+      "score": 0.2
+    },
+    "slashdot_14": {
+      "title": "Microsoft Reveals Major Price Increase For All Surface PCs",
+      "url": "https://mobile.slashdot.org/story/26/04/14/234246/fcc-grants-netgear-conditional-approval-for-routers?utm_source=rss1.0mainlinkanon&amp;utm_medium=feed",
+      "source": "Slashdot",
+      "processed_at": "2026-04-15T23:53:27.999092Z",
+      "score": 0.2
     }
   },
-  "run_count": 5,
+  "run_count": 6,
   "statistics": {
-    "total_processed": 59,
-    "sent_today": 16,
+    "total_processed": 82,
+    "sent_today": 23,
     "sources_checked": [
       "HackerNews",
       "ArXiv",
       "Reddit",
       "Lobsters",
       "TechCrunch",
+      "Medium",
+      "Indie Hackers",
+      "Slashdot",
+      "Mastodon",
       "GitHub Trending"
     ]
   }

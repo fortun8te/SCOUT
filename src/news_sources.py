@@ -27,13 +27,17 @@ class NewsSourceAggregator:
         all_articles = []
         sources_checked = []
 
-        # Build parallel tasks
+        # Build parallel tasks - MASSIVE source list
         tasks = [
             self._fetch_hackernews(),
             self._fetch_arxiv(),
             self._fetch_reddit(),
             self._fetch_lobsters(),
             self._fetch_techcrunch(),
+            self._fetch_medium(),
+            self._fetch_indie_hackers(),
+            self._fetch_slashdot(),
+            self._fetch_mastodon(),
         ]
 
         # Add optional sources if API keys provided
@@ -51,10 +55,14 @@ class NewsSourceAggregator:
             ("Reddit", results[2]),
             ("Lobsters", results[3]),
             ("TechCrunch", results[4]),
+            ("Medium", results[5]),
+            ("Indie Hackers", results[6]),
+            ("Slashdot", results[7]),
+            ("Mastodon", results[8]),
         ]
 
         if self.api_keys.get("newsapi_key"):
-            result_map.append(("NewsAPI", results[5]))
+            result_map.append(("NewsAPI", results[9]))
 
         for source_name, result in result_map:
             if isinstance(result, Exception):
@@ -171,7 +179,13 @@ class NewsSourceAggregator:
         """Fetch top posts from AI-related subreddits"""
         try:
             articles = []
-            subreddits = ["MachineLearning", "OpenAI", "artificial", "LanguageModels", "LocalLLaMA"]
+            # Massive list of AI/tech subreddits
+            subreddits = [
+                "MachineLearning", "OpenAI", "artificial", "LanguageModels", "LocalLLaMA",
+                "ChatGPT", "Anthropic", "learnmachinelearning", "deeplearning", "neuralnetworks",
+                "compsci", "programming", "technology", "coding", "Python", "ArtificialIntelligence",
+                "tech", "startups", "futurology", "news", "science", "explainlikeimfive"
+            ]
 
             for sub in subreddits:
                 try:
@@ -312,6 +326,143 @@ class NewsSourceAggregator:
             return articles
         except Exception as e:
             logger.warning(f"TechCrunch error: {e}")
+            return []
+
+    async def _fetch_medium(self) -> List[Dict]:
+        """Fetch from Medium AI publications"""
+        try:
+            response = self.session.get(
+                "https://medium.com/tag/artificial-intelligence/latest",
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+                timeout=10
+            )
+            response.raise_for_status()
+
+            # Basic HTML parsing for Medium
+            import re as regex
+            titles = regex.findall(r'<h2[^>]*>([^<]+)</h2>', response.text)
+            urls = regex.findall(r'href="(https://medium\.com/[^"]+)"', response.text)
+
+            articles = []
+            for i, title in enumerate(titles[:15]):
+                if i < len(urls):
+                    articles.append({
+                        "id": f"medium_{i}",
+                        "title": title.strip(),
+                        "url": urls[i],
+                        "source": "Medium",
+                        "published_at": datetime.utcnow(),
+                        "engagement_score": 0,
+                        "is_recent": True
+                    })
+            return articles
+        except Exception as e:
+            logger.warning(f"Medium error: {e}")
+            return []
+
+    async def _fetch_indie_hackers(self) -> List[Dict]:
+        """Fetch from Indie Hackers"""
+        try:
+            response = self.session.get(
+                "https://www.indiehackers.com/feed.json",
+                timeout=10
+            )
+            response.raise_for_status()
+            posts = response.json()
+
+            articles = []
+            for post in posts.get("posts", [])[:20]:
+                try:
+                    articles.append({
+                        "id": f"ih_{post['id']}",
+                        "title": post.get("title", ""),
+                        "url": post.get("url", ""),
+                        "source": "Indie Hackers",
+                        "published_at": datetime.utcnow(),
+                        "engagement_score": post.get("votes_count", 0),
+                        "is_recent": True
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse IH post: {e}")
+                    continue
+            return articles
+        except Exception as e:
+            logger.warning(f"Indie Hackers error: {e}")
+            return []
+
+    async def _fetch_slashdot(self) -> List[Dict]:
+        """Fetch from Slashdot tech news"""
+        try:
+            response = self.session.get(
+                "https://slashdot.org/index.rss",
+                timeout=10
+            )
+            response.raise_for_status()
+
+            # Parse RSS with regex
+            import re as regex
+            titles = regex.findall(r'<title>([^<]+)</title>', response.text)
+            urls = regex.findall(r'<link>([^<]+)</link>', response.text)
+
+            articles = []
+            for i, title in enumerate(titles[1:16]):  # Skip first (feed title)
+                if i < len(urls):
+                    articles.append({
+                        "id": f"slashdot_{i}",
+                        "title": title.strip(),
+                        "url": urls[i] if urls[i].startswith('http') else f"https://slashdot.org{urls[i]}",
+                        "source": "Slashdot",
+                        "published_at": datetime.utcnow(),
+                        "engagement_score": 0,
+                        "is_recent": True
+                    })
+            return articles
+        except Exception as e:
+            logger.warning(f"Slashdot error: {e}")
+            return []
+
+    async def _fetch_mastodon(self) -> List[Dict]:
+        """Fetch from Mastodon instances (decentralized Twitter alternative)"""
+        try:
+            # Search across federated Mastodon instances
+            response = self.session.get(
+                "https://mastodon.social/api/v2/search",
+                params={
+                    "q": "AI artificial intelligence machine learning",
+                    "type": "statuses",
+                    "limit": 30
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            statuses = response.json().get("statuses", [])
+
+            articles = []
+            for status in statuses[:20]:
+                try:
+                    # Clean HTML content
+                    import re as regex
+                    content = status.get("content", "")
+                    content = regex.sub(r'<[^>]+>', '', content)  # Remove HTML tags
+
+                    articles.append({
+                        "id": f"mastodon_{status['id']}",
+                        "title": content[:100] if content else "Mastodon post",
+                        "url": status.get("url", ""),
+                        "source": f"Mastodon (@{status.get('account', {}).get('username', 'unknown')})",
+                        "published_at": datetime.fromisoformat(
+                            status.get("created_at", "").replace("Z", "+00:00")
+                        ) if status.get("created_at") else datetime.utcnow(),
+                        "engagement_score": status.get("favourites_count", 0) + status.get("replies_count", 0),
+                        "is_recent": True,
+                        "content": content
+                    })
+                except Exception as e:
+                    logger.debug(f"Failed to parse Mastodon post: {e}")
+                    continue
+            return articles
+        except Exception as e:
+            logger.warning(f"Mastodon error: {e}")
             return []
 
     async def _fetch_rss_feeds(self) -> List[Dict]:

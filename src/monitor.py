@@ -135,6 +135,17 @@ async def main():
 
         if not all_articles:
             logger.warning("⚠️ No articles fetched from any source")
+            # Even if APIs fail, try to send something
+            logger.info("Attempting fallback: will try to send cache or placeholder")
+            # Could send analytics or error summary instead
+            try:
+                notifier = DiscordNotifier(
+                    bot_token=os.getenv("DISCORD_BOT_TOKEN", ""),
+                    user_id=os.getenv("DISCORD_USER_ID", "")
+                )
+                notifier.send_digest("No articles found in this run. All news sources may be temporarily unavailable.")
+            except:
+                pass
             return
 
         # Semantic deduplication (remove near-duplicates from same batch)
@@ -164,6 +175,16 @@ async def main():
         # Get new articles (not processed before, with state dedup)
         new_articles = state.get_new_articles(filtered_articles)
         logger.info(f"[DEDUP-STATE] ✓ Found {len(new_articles)} new articles to send")
+
+        # Safety net: if we got 0 articles, retry with even lower threshold
+        if len(new_articles) == 0 and len(filtered_articles) > 0:
+            logger.warning("[SAFETY] Got articles but all filtered out by state. Lowering threshold...")
+            filter_engine_loose = FilterEngine(threshold=0.05)
+            filtered_loose = filter_engine_loose.filter_and_rank(deduplicated)
+            quality_articles = quality_checker.filter_articles(filtered_loose)
+            new_articles = state.get_new_articles(quality_articles)
+            if new_articles:
+                logger.info(f"[SAFETY] ✓ Recovered {len(new_articles)} articles with looser filter")
 
         # Add summaries if enabled
         if summarizer.enabled and new_articles:
