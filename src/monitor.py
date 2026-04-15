@@ -28,6 +28,9 @@ from src.summarizer import SummarizerEngine
 from src.analytics import AnalyticsEngine
 from src.deduplicator import DeduplicatorEngine
 from src.retry_handler import RetryHandler
+from src.cache_manager import CacheManager
+from src.additional_sources import AdditionalSources
+from src.webhook_handler import WebhookHandler
 
 # Configure logging
 logging.basicConfig(
@@ -82,24 +85,35 @@ async def main():
         else:
             logger.info("[SUMMARY] Summarization disabled (no GEMINI_API_KEY)")
 
-        # Initialize deduplicator and retry handler
+        # Initialize deduplicator, retry handler, cache, and additional sources
         deduplicator = DeduplicatorEngine(similarity_threshold=0.85)
         retrier = RetryHandler(max_retries=3, base_delay=1.0)
+        cache = CacheManager(Path("data/cache"))
+        additional = AdditionalSources()
+        webhook = WebhookHandler()
+
         logger.info("[DEDUP] Semantic deduplicator initialized")
         logger.info("[RETRY] Exponential backoff retry enabled (3 attempts)")
+        logger.info("[CACHE] Smart caching enabled")
 
         # Fetch news from all sources in PARALLEL
-        logger.info("[FETCH] 🚀 Starting PARALLEL news fetch from all sources...")
+        logger.info("[FETCH] Starting comprehensive news fetch from 8+ sources in parallel...")
         all_articles, sources_checked = await sources.fetch_all()
 
         # Add Bluesky articles (real-time) with retry
-        logger.info("[BLUESKY] Fetching recent Bluesky posts (with retry)...")
+        logger.info("[BLUESKY] Fetching Bluesky posts...")
         bluesky_articles = await retrier.execute_with_retry(
             bluesky.fetch_recent_posts
         ) or []
         all_articles.extend(bluesky_articles)
         if bluesky_articles:
             sources_checked.append("Bluesky")
+
+        # Add additional sources (Product Hunt, Dev.to, GitHub trending)
+        logger.info("[SOURCES] Fetching Product Hunt, Dev.to, GitHub trending...")
+        additional_articles, additional_sources = await additional.fetch_all_additional()
+        all_articles.extend(additional_articles)
+        sources_checked.extend(additional_sources)
 
         logger.info(
             f"[FETCH] ✓ Fetched {len(all_articles)} total articles "
