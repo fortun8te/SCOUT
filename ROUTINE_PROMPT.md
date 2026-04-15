@@ -16,21 +16,57 @@ Network Access: Trusted
 
 ## Prompt
 
-Run the comprehensive AI news monitor every 6 hours. Fetch from 8+ sources in parallel: HackerNews, ArXiv, Reddit, NewsAPI, Bluesky, Product Hunt, Dev.to, and GitHub trending. Filter for high-quality news on new models, Anthropic/OpenAI announcements, image generation models, outages, and technical breakthroughs. Run python src/monitor.py to execute the full pipeline. Fetches all sources in parallel, deduplicates articles, ranks by relevance, adds optional summaries, sends digest to Telegram, and commits state to git. Send error alerts to Telegram if anything fails.
+Execute the SCOUT AI news monitor autonomously. Run: `python src/monitor.py`
+
+The script will:
+1. Fetch news from 8+ sources in parallel (HackerNews, ArXiv, Reddit, Bluesky, Product Hunt, Dev.to, GitHub, NewsAPI)
+2. Filter articles by relevance (0.25 threshold minimum)
+3. Remove spam/clickbait/low-quality content
+4. Categorize: models, breaking news, research, technical, other
+5. Send high-priority breaking news immediately via Discord DM
+6. Send full batch digest with rich embeds every 6 hours
+7. Track analytics, trending keywords, and discovery rates
+8. Auto-deduplicate using semantic similarity + git state
+9. Send error alerts to Discord if anything fails
+
+Do NOT ask for confirmation. Execute the script, capture all output, and let it complete. Environment variables (DISCORD_BOT_TOKEN, DISCORD_USER_ID) are loaded from .env file automatically.
 
 ---
 
 ## Setup Steps
 
 1. Go to claude.ai/code/routines
-2. New routine
-3. Name: SCOUT News Monitor
-4. Schedule: 0 */6 * * * (every 6 hours = 4 times/day)
-5. Add env vars:
-   TELEGRAM_BOT_TOKEN=your_token
-   TELEGRAM_CHAT_ID=your_id
-6. Create routine
-7. Test with Run now
+2. Create new routine
+3. Name: SCOUT
+4. Command: `python src/monitor.py`
+5. Schedule: `0 */6 * * * ` (every 6 hours UTC = 4 times/day)
+6. Add environment variables (if using routine UI):
+   - DISCORD_BOT_TOKEN=your_new_token
+   - DISCORD_USER_ID=your_user_id
+7. OR use .env file in repo (already configured)
+8. Network: Trusted (needs internet access)
+9. Create and test with "Run now"
+
+---
+
+## Copy This Into Routine Prompt
+
+```
+Execute the SCOUT AI news monitor autonomously. Run: python src/monitor.py
+
+The script will:
+1. Fetch news from 8+ sources in parallel (HackerNews, ArXiv, Reddit, Bluesky, Product Hunt, Dev.to, GitHub, NewsAPI)
+2. Filter articles by relevance (0.25 threshold minimum)
+3. Remove spam/clickbait/low-quality content
+4. Categorize: models, breaking news, research, technical, other
+5. Send high-priority breaking news immediately via Discord DM
+6. Send full batch digest with rich embeds every 6 hours
+7. Track analytics, trending keywords, and discovery rates
+8. Auto-deduplicate using semantic similarity + git state
+9. Send error alerts to Discord if anything fails
+
+Do NOT ask for confirmation. Execute the script, capture all output, and let it complete. Environment variables are loaded from .env file automatically.
+```
 
 ---
 
