@@ -31,6 +31,7 @@ from src.retry_handler import RetryHandler
 from src.cache_manager import CacheManager
 from src.additional_sources import AdditionalSources
 from src.webhook_handler import WebhookHandler
+from src.bot_status import BotStatusManager
 
 # Configure logging
 logging.basicConfig(
@@ -48,9 +49,16 @@ async def main():
     """Main orchestration function - Phase 2 Enhanced"""
     try:
         logger.info("=" * 70)
-        logger.info("🚀 SCOUT News Monitor Starting (Phase 2)")
+        logger.info("SCOUT News Monitor Starting")
         logger.info(f"Run time: {datetime.utcnow().isoformat()}Z")
         logger.info("=" * 70)
+
+        # Set bot status to DND
+        bot_token = os.getenv("DISCORD_BOT_TOKEN", "")
+        if bot_token:
+            status_mgr = BotStatusManager(bot_token)
+            status_mgr.run_status_update()
+            logger.info("[BOT] Status set to DND")
 
         # Initialize components
         state = StateManager(Path("data/processed_news.json"))
