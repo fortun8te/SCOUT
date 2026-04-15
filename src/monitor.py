@@ -32,6 +32,7 @@ from src.cache_manager import CacheManager
 from src.additional_sources import AdditionalSources
 from src.webhook_handler import WebhookHandler
 from src.bot_status import BotStatusManager
+from src.quality_checker import QualityChecker
 
 # Configure logging
 logging.basicConfig(
@@ -148,6 +149,14 @@ async def main():
             f"[FILTER] ✓ Filtered to {len(filtered_articles)} "
             f"high-quality articles"
         )
+
+        # Quality assurance - remove BS/garbage
+        quality_checker = QualityChecker()
+        quality_articles = quality_checker.filter_articles(filtered_articles)
+        logger.info(
+            f"[QUALITY] ✓ {len(quality_articles)} articles passed quality checks"
+        )
+        filtered_articles = quality_articles
 
         # Get new articles (not processed before, with state dedup)
         new_articles = state.get_new_articles(filtered_articles)
