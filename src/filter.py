@@ -1,0 +1,158 @@
+"""Article filtering and relevance scoring"""
+
+import logging
+import re
+from typing import Dict, List
+
+logger = logging.getLogger(__name__)
+
+# Keyword weighting for relevance scoring
+KEYWORDS = {
+    # Model releases (highest priority)
+    "model_release": {
+        "patterns": [
+            r"GPT-\d+", r"Claude", r"Llama", r"Mixtral", r"Phi", r"Qwen",
+            r"released", r"launch", r"announce.*available", r"beta", r"alpha"
+        ],
+        "weight": 0.35
+    },
+    # Leaks and rumors
+    "leaks": {
+        "patterns": [
+            r"leak", r"coming soon", r"rumor", r"alleged", r"unreleased",
+            r"codename", r"internal", r"roadmap"
+        ],
+        "weight": 0.25
+    },
+    # Benchmarks
+    "benchmark": {
+        "patterns": [
+            r"SOTA", r"state-of-the-art", r"record", r"beats", r"outperforms",
+            r"MMLU", r"HumanEval", r"benchmark", r"evaluation"
+        ],
+        "weight": 0.30
+    },
+    # Technical methods
+    "method": {
+        "patterns": [
+            r"fine-tun", r"LORA", r"RAG", r"prompt engineering", r"multimodal",
+            r"chain-of-thought", r"scaling laws", r"mixture of experts", r"sparse",
+            r"quantization", r"distillation", r"alignment", r"RLHF"
+        ],
+        "weight": 0.20
+    },
+    # Company announcements
+    "company": {
+        "patterns": [
+            r"OpenAI", r"Anthropic", r"Google", r"DeepMind", r"Meta",
+            r"Mistral", r"Stability AI", r"xAI"
+        ],
+        "weight": 0.10
+    }
+}
+
+# Source credibility
+CREDIBLE_SOURCES = {
+    "OpenAI": 0.25,
+    "Anthropic": 0.25,
+    "Google DeepMind": 0.25,
+    "Google": 0.23,
+    "Meta AI": 0.20,
+    "ArXiv": 0.20,
+    "Hugging Face": 0.20,
+    "TechCrunch": 0.15,
+    "The Verge": 0.14,
+    "HackerNews": 0.15,
+    "Medium": 0.10,
+    "Reddit": 0.08
+}
+
+
+class FilterEngine:
+    """Ranks and filters articles by relevance"""
+
+    def __init__(self, threshold: float = 0.5):
+        self.threshold = threshold
+
+    def calculate_score(self, article: Dict) -> float:
+        """Calculate relevance score for an article (0-1.0)"""
+        score = 0.0
+        title = article.get("title", "").lower()
+        source = article.get("source", "")
+
+        # 1. Source credibility (0-0.25)
+        for credible_source, weight in CREDIBLE_SOURCES.items():
+            if credible_source.lower() in source.lower():
+                score += weight
+                break
+        else:
+            # Default for unknown sources
+            score += 0.05
+
+        # 2. Content type keywords (0-0.35)
+        for category, config in KEYWORDS.items():
+            for pattern in config["patterns"]:
+                if re.search(pattern, title, re.IGNORECASE):
+                    score += config["weight"] / len(config["patterns"])
+                    break
+
+        # 3. Recency bonus (0-0.15)
+        if article.get("is_recent"):
+            score += 0.15
+
+        # 4. Engagement metric if available (0-0.15)
+        engagement = article.get("engagement_score", 0)
+        if engagement > 1000:
+            score += 0.15
+        elif engagement > 100:
+            score += 0.10
+        elif engagement > 10:
+            score += 0.05
+
+        return min(1.0, score)
+
+    def filter_and_rank(self, articles: List[Dict]) -> List[Dict]:
+        """Filter articles by threshold and rank by score"""
+        # Score all articles
+        scored = []
+        for article in articles:
+            score = self.calculate_score(article)
+            article["relevance_score"] = score
+            scored.append((article, score))
+
+        # Filter by threshold
+        filtered = [a for a, score in scored if score >= self.threshold]
+
+        # Sort by score (highest first)
+        filtered.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+
+        logger.info(
+            f"Filtered {len(articles)} articles → {len(filtered)} above threshold {self.threshold}"
+        )
+        return filtered
+
+    def categorize(self, articles: List[Dict]) -> Dict[str, List[Dict]]:
+        """Categorize articles by content type"""
+        categories = {
+            "models": [],
+            "breaking": [],
+            "research": [],
+            "technical": [],
+            "other": []
+        }
+
+        for article in articles:
+            title = article.get("title", "").lower()
+
+            if any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["model_release"]["patterns"]):
+                categories["models"].append(article)
+            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["leaks"]["patterns"]):
+                categories["breaking"].append(article)
+            elif article.get("source") == "ArXiv":
+                categories["research"].append(article)
+            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["method"]["patterns"]):
+                categories["technical"].append(article)
+            else:
+                categories["other"].append(article)
+
+        return categories

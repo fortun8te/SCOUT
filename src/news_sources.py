@@ -1,0 +1,216 @@
+"""News source aggregation from multiple APIs"""
+
+import asyncio
+import json
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+
+class NewsSourceAggregator:
+    """Aggregates news from multiple sources"""
+
+    def __init__(self, api_keys: Dict[str, str] = None):
+        self.api_keys = api_keys or {}
+        self.session = requests.Session()
+
+    async def fetch_all(self) -> List[Dict]:
+        """Fetch from all sources and combine results"""
+        all_articles = []
+        sources_checked = []
+
+        # Tier 1: Free, no auth
+        try:
+            articles = await self._fetch_hackernews()
+            all_articles.extend(articles)
+            sources_checked.append("HackerNews")
+        except Exception as e:
+            logger.warning(f"HackerNews fetch failed: {e}")
+
+        try:
+            articles = await self._fetch_arxiv()
+            all_articles.extend(articles)
+            sources_checked.append("ArXiv")
+        except Exception as e:
+            logger.warning(f"ArXiv fetch failed: {e}")
+
+        try:
+            articles = await self._fetch_reddit()
+            all_articles.extend(articles)
+            sources_checked.append("Reddit")
+        except Exception as e:
+            logger.warning(f"Reddit fetch failed: {e}")
+
+        # Tier 2: Requires API key
+        if self.api_keys.get("newsapi_key"):
+            try:
+                articles = await self._fetch_newsapi()
+                all_articles.extend(articles)
+                sources_checked.append("NewsAPI")
+            except Exception as e:
+                logger.warning(f"NewsAPI fetch failed: {e}")
+
+        logger.info(f"Fetched {len(all_articles)} articles from {len(sources_checked)} sources")
+        return all_articles, sources_checked
+
+    async def _fetch_hackernews(self) -> List[Dict]:
+        """Fetch top stories from HackerNews using Algolia API"""
+        try:
+            response = self.session.get(
+                "https://hn.algolia.com/api/v1/search",
+                params={
+                    "query": "AI OR artificial intelligence OR machine learning",
+                    "tags": "story",
+                    "numericFilters": "points>10",
+                    "hitsPerPage": 30,
+                    "sortBy": "byDate"
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            hits = response.json().get("hits", [])
+
+            articles = []
+            for hit in hits:
+                articles.append({
+                    "id": f"hn_{hit['objectID']}",
+                    "title": hit.get("title", ""),
+                    "url": hit.get("url", ""),
+                    "source": "HackerNews",
+                    "published_at": datetime.fromisoformat(hit.get("created_at", "").replace("Z", "+00:00")),
+                    "engagement_score": hit.get("points", 0),
+                    "is_recent": True
+                })
+            return articles
+        except Exception as e:
+            logger.error(f"HackerNews error: {e}")
+            return []
+
+    async def _fetch_arxiv(self) -> List[Dict]:
+        """Fetch recent AI papers from ArXiv via HTTP API"""
+        try:
+            response = self.session.get(
+                "http://export.arxiv.org/api/query",
+                params={
+                    "search_query": "cat:cs.AI OR cat:cs.CL OR cat:cs.LG",
+                    "start": 0,
+                    "max_results": 30,
+                    "sortBy": "submittedDate",
+                    "sortOrder": "descending"
+                },
+                timeout=15
+            )
+            response.raise_for_status()
+
+            # Parse XML response
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(response.content)
+
+            articles = []
+            ns = {"atom": "http://www.w3.org/2005/Atom"}
+
+            for entry in root.findall("atom:entry", ns):
+                title_elem = entry.find("atom:title", ns)
+                id_elem = entry.find("atom:id", ns)
+                published_elem = entry.find("atom:published", ns)
+
+                if title_elem is not None and id_elem is not None:
+                    arxiv_id = id_elem.text.split("/abs/")[-1]
+                    articles.append({
+                        "id": f"arxiv_{arxiv_id}",
+                        "title": title_elem.text.replace("\n", " ").strip(),
+                        "url": f"https://arxiv.org/abs/{arxiv_id}",
+                        "source": "ArXiv",
+                        "published_at": datetime.fromisoformat(
+                            published_elem.text.replace("Z", "+00:00")
+                        ) if published_elem is not None else datetime.utcnow(),
+                        "engagement_score": 0,
+                        "is_recent": True
+                    })
+            return articles
+        except Exception as e:
+            logger.error(f"ArXiv error: {e}")
+            return []
+
+    async def _fetch_reddit(self) -> List[Dict]:
+        """Fetch top posts from AI-related subreddits"""
+        try:
+            articles = []
+            subreddits = ["MachineLearning", "OpenAI", "artificial", "LanguageModels", "LocalLLaMA"]
+
+            for sub in subreddits:
+                try:
+                    response = self.session.get(
+                        f"https://www.reddit.com/r/{sub}/new.json",
+                        headers={"User-Agent": "AINewsBot/1.0"},
+                        timeout=10
+                    )
+                    response.raise_for_status()
+                    posts = response.json().get("data", {}).get("children", [])
+
+                    for post_data in posts[:10]:
+                        post = post_data["data"]
+                        articles.append({
+                            "id": f"reddit_{post['id']}",
+                            "title": post.get("title", ""),
+                            "url": post.get("url", ""),
+                            "source": f"Reddit (r/{sub})",
+                            "published_at": datetime.fromtimestamp(post.get("created_utc", 0)),
+                            "engagement_score": post.get("score", 0),
+                            "is_recent": True
+                        })
+                except Exception as e:
+                    logger.warning(f"Reddit r/{sub} error: {e}")
+                    continue
+
+            return articles
+        except Exception as e:
+            logger.error(f"Reddit error: {e}")
+            return []
+
+    async def _fetch_newsapi(self) -> List[Dict]:
+        """Fetch from NewsAPI.org"""
+        try:
+            api_key = self.api_keys.get("newsapi_key")
+            if not api_key:
+                return []
+
+            response = self.session.get(
+                "https://newsapi.org/v2/everything",
+                params={
+                    "q": "AI OR artificial intelligence OR machine learning OR deep learning",
+                    "sortBy": "publishedAt",
+                    "language": "en",
+                    "pageSize": 30,
+                    "apiKey": api_key
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            articles_data = response.json().get("articles", [])
+
+            articles = []
+            for article in articles_data:
+                articles.append({
+                    "id": f"newsapi_{article.get('url', '').replace('/', '_')}",
+                    "title": article.get("title", ""),
+                    "url": article.get("url", ""),
+                    "source": article.get("source", {}).get("name", "NewsAPI"),
+                    "published_at": datetime.fromisoformat(article.get("publishedAt", "").replace("Z", "+00:00")),
+                    "engagement_score": 0,
+                    "is_recent": True
+                })
+            return articles
+        except Exception as e:
+            logger.error(f"NewsAPI error: {e}")
+            return []
+
+    async def _fetch_rss_feeds(self) -> List[Dict]:
+        """Fetch from RSS feeds (fallback) - currently disabled due to dependencies"""
+        # RSS fetching disabled to reduce dependency complexity
+        # Can be re-enabled with feedparser library
+        return []

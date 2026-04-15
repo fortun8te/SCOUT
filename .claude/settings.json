@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$CLAUDE_CODE_REMOTE\" = \"true\" ]; then pip install -q requests beautifulsoup4 feedparser python-telegram-bot; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
