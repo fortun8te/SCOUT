@@ -53,10 +53,16 @@ class DiscordNotifier:
             )
 
             if result.returncode == 0:
-                response = json.loads(result.stdout)
-                self.dm_channel_id = response.get("id")
-                self.api_url = f"https://discord.com/api/v10/channels/{self.dm_channel_id}/messages"
-                logger.info(f"DM channel initialized: {self.dm_channel_id}")
+                try:
+                    response = json.loads(result.stdout)
+                    self.dm_channel_id = response.get("id")
+                    if self.dm_channel_id:
+                        self.api_url = f"https://discord.com/api/v10/channels/{self.dm_channel_id}/messages"
+                        logger.info(f"DM channel initialized: {self.dm_channel_id}")
+                    else:
+                        logger.error(f"No channel ID in response: {result.stdout}")
+                except json.JSONDecodeError as je:
+                    logger.error(f"Failed to parse DM response: {result.stdout} - {je}")
             else:
                 logger.error(f"Failed to init DM channel: {result.stderr}")
         except Exception as e:
@@ -65,6 +71,10 @@ class DiscordNotifier:
     def send_digest(self, digest_text: str) -> bool:
         """Send formatted digest to Discord (plain text fallback)"""
         try:
+            if not self.api_url:
+                logger.error("Cannot send digest: Discord API URL not initialized")
+                return False
+
             # Discord has 2000 char limit per message, split if needed
             if len(digest_text) > 1950:
                 chunks = self._split_message(digest_text, 1950)
@@ -102,6 +112,10 @@ class DiscordNotifier:
     def send_digest_embeds(self, articles_by_category: Dict[str, List[Dict]]) -> bool:
         """Send formatted digest using Discord embeds for rich formatting"""
         try:
+            if not self.api_url:
+                logger.error("Cannot send embeds: Discord API URL not initialized")
+                return False
+
             embeds = []
 
             # Create header embed
@@ -207,6 +221,10 @@ class DiscordNotifier:
     def send_breaking_alert(self, article: Dict) -> bool:
         """Send immediate alert for breaking news"""
         try:
+            if not self.api_url:
+                logger.error("Cannot send breaking alert: Discord API URL not initialized")
+                return False
+
             embed = {
                 "title": f"🚨 BREAKING: {article.get('title', 'Breaking News')[:200]}",
                 "url": article.get("url", ""),
@@ -253,6 +271,10 @@ class DiscordNotifier:
     def send_error_alert(self, error_message: str) -> bool:
         """Send error notification to Discord"""
         try:
+            if not self.api_url:
+                logger.error("Cannot send error alert: Discord API URL not initialized")
+                return False
+
             embed = {
                 "title": "⚠️ SCOUT Monitor Error",
                 "description": error_message[:2048],
@@ -333,6 +355,10 @@ class DiscordNotifier:
     def send_analytics_embed(self, stats: Dict) -> bool:
         """Send analytics summary as Discord embed"""
         try:
+            if not self.api_url:
+                logger.error("Cannot send analytics: Discord API URL not initialized")
+                return False
+
             # Calculate metrics
             total_runs = len(stats.get("runs", []))
             total_sent = stats.get("total_articles_sent", 0)

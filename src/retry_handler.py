@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import random
+import time
 from typing import Callable, Any
 
 logger = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ class RetryHandler:
                         f"[RETRY] {func.__name__} failed attempt {attempt}/{self.max_retries}. "
                         f"Retrying in {wait_time:.1f}s..."
                     )
-                    asyncio.run(asyncio.sleep(wait_time))
+                    time.sleep(wait_time)
                 else:
                     logger.error(
                         f"[RETRY] {func.__name__} failed all {self.max_retries} attempts"
