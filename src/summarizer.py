@@ -43,6 +43,8 @@ class SummarizerEngine:
                 return self._summarize_gemini(text, max_length)
             elif self.provider == "groq":
                 return self._summarize_groq(text, max_length)
+            elif self.provider == "claude":
+                return self._summarize_claude(text, max_length)
         except Exception as e:
             logger.warning(f"Summarization failed: {e}")
             return None
@@ -101,6 +103,36 @@ class SummarizerEngine:
             return summary
         except Exception as e:
             logger.error(f"Groq summarization error: {e}")
+            return None
+
+    def _summarize_claude(self, text: str, max_length: int) -> Optional[str]:
+        """Summarize using Claude Haiku API (cheapest paid option)"""
+        try:
+            from anthropic import Anthropic
+
+            client = Anthropic(api_key=self.api_key)
+
+            message = client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=100,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"""Summarize this news article in 1-2 sentences ({max_length} chars max),
+                        focusing on key facts and impact:
+
+{text[:2000]}"""
+                    }
+                ]
+            )
+
+            summary = message.content[0].text.strip()
+            if len(summary) > max_length:
+                summary = summary[:max_length] + "..."
+
+            return summary
+        except Exception as e:
+            logger.error(f"Claude summarization error: {e}")
             return None
 
     @staticmethod

@@ -124,11 +124,14 @@ class FilterEngine:
             score += 0.05
 
         # 2. Content type keywords (0-0.35)
+        max_keyword_score = 0
         for category, config in KEYWORDS.items():
             for pattern in config["patterns"]:
                 if re.search(pattern, title, re.IGNORECASE):
-                    score += config["weight"] / len(config["patterns"])
+                    keyword_score = config["weight"] / len(config["patterns"])
+                    max_keyword_score = max(max_keyword_score, keyword_score)
                     break
+        score += max_keyword_score
 
         # 3. Recency bonus (0-0.15)
         if article.get("is_recent"):
@@ -142,6 +145,26 @@ class FilterEngine:
             score += 0.10
         elif engagement > 10:
             score += 0.05
+
+        # 5. Title length bonus (0-0.05) - longer titles often contain more info
+        title_len = len(article.get("title", ""))
+        if title_len > 80:
+            score += 0.05
+        elif title_len > 60:
+            score += 0.03
+
+        # 6. Company-specific news boost (0-0.05) - when major companies announce
+        major_companies = ["Anthropic", "OpenAI", "Google", "DeepMind", "Meta"]
+        if any(company in title for company in major_companies):
+            score += 0.05
+
+        # 7. Major model announcement boost (0-0.10) - GPT-5, Claude 4, Gemini 3, etc.
+        major_model_patterns = [
+            r"GPT-[5-9]", r"Claude [4-9]", r"Gemini [3-9]", r"Llama [3-9]",
+            r"o1", r"o3", r"Claude 4", r"GPT-5", r"Gemini 3"
+        ]
+        if any(re.search(pattern, title, re.IGNORECASE) for pattern in major_model_patterns):
+            score += 0.10
 
         return min(1.0, score)
 

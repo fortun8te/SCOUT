@@ -174,6 +174,14 @@ async def main():
                 f"{', '.join(f'{k}:{len(v)}' for k, v in categorized.items() if v)}"
             )
 
+            # Send immediate breaking news alerts (score > 0.9 + breaking category)
+            breaking_articles = categorized.get("breaking", [])
+            if breaking_articles:
+                logger.info(f"[BREAKING] Sending {len(breaking_articles)} breaking news alerts...")
+                for article in breaking_articles[:3]:  # Alert on top 3 breaking news
+                    if article.get("relevance_score", 0) > 0.85:
+                        notifier.send_breaking_alert(article)
+
             # Format and send digest (prefer rich embeds)
             logger.info("[DISCORD] Sending digest with rich embeds...")
             if notifier.send_digest_embeds(categorized):
