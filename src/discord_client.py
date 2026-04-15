@@ -120,11 +120,13 @@ class DiscordNotifier:
 
             # Create header embed
             total_articles = sum(len(v) for v in articles_by_category.values())
-            today = datetime.now().strftime("%b %d, %Y")
+            now = datetime.now()
+            date_str = now.strftime("%B %d, %Y")
+            time_str = now.strftime("%I:%M %p")
 
             header_embed = {
-                "title": f"AI News - {today}",
-                "description": f"{total_articles} stories",
+                "title": date_str,
+                "description": f"{time_str}\n{total_articles} stories",
                 "color": 0x1f77b4
             }
 
@@ -142,18 +144,26 @@ class DiscordNotifier:
                     if article_count >= 10:
                         break
 
-                    title = article.get("title", "")[:120]
+                    title = article.get("title", "")[:150]
                     url = article.get("url", "")
                     source = article.get("source", "Unknown")
+                    summary = article.get("summary", "")
+
+                    # Build description with summary or content
+                    description = ""
+                    if summary:
+                        description = summary[:200]
+                    else:
+                        content = article.get("content", "")[:200]
+                        if content:
+                            description = content
 
                     embed = {
                         "title": title,
                         "url": url,
-                        "color": cat_color
+                        "color": cat_color,
+                        "description": description if description else source
                     }
-
-                    if source:
-                        embed["description"] = source
 
                     embeds.append(embed)
                     article_count += 1
@@ -290,10 +300,14 @@ class DiscordNotifier:
         from datetime import datetime
         lines = []
 
-        today = datetime.now().strftime("%b %d")
+        now = datetime.now()
+        date_str = now.strftime("%B %d, %Y")
+        time_str = now.strftime("%I:%M %p")
         total_articles = sum(len(v) for v in articles_by_category.values())
 
-        lines.append(f"**AI News - {today}** ({total_articles} stories)")
+        lines.append(f"# {date_str}")
+        lines.append(f"## {time_str}")
+        lines.append(f"**{total_articles} stories**")
         lines.append("")
 
         article_num = 1
@@ -302,11 +316,21 @@ class DiscordNotifier:
                 continue
 
             for article in articles[:3]:  # Max 3 per category
-                title = article.get("title", "")[:80]
+                title = article.get("title", "")[:100]
                 source = article.get("source", "Unknown")
+                summary = article.get("summary", "")
 
                 lines.append(f"**{article_num}. {title}**")
-                lines.append(f"{source}")
+
+                # Add summary if available, otherwise use first 100 chars of content
+                if summary:
+                    lines.append(summary[:120])
+                else:
+                    content = article.get("content", "")[:120]
+                    if content:
+                        lines.append(content)
+
+                lines.append(f"_{source}_")
                 lines.append("")
                 article_num += 1
 
