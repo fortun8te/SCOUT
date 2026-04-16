@@ -30,133 +30,102 @@ class AdditionalSources:
         self.session = requests.Session()
 
     async def fetch_product_hunt(self) -> List[Dict]:
-        """Fetch from Product Hunt (tech launches)"""
+        """Fetch Product Hunt launches"""
         try:
             response = self.session.get(
                 "https://api.producthunt.com/v2/posts",
-                params={
-                    "searchQuery": "AI machine learning",
-                    "limit": 20
-                },
+                params={"searchQuery": "AI machine learning", "limit": 20},
                 timeout=10
             )
-
             if response.status_code != 200:
                 return []
 
-            posts = response.json().get("data", [])
             articles = []
-
-            for post in posts[:15]:
+            for post in response.json().get("data", [])[:15]:
+                pub_date = post.get("createdAt", "").replace("Z", "+00:00")
                 articles.append({
                     "id": f"ph_{post.get('id')}",
                     "title": post.get("name", ""),
                     "url": post.get("url", ""),
                     "source": "Product Hunt",
-                    "published_at": datetime.fromisoformat(
-                        post.get("createdAt", "").replace("Z", "+00:00")
-                    ) if post.get("createdAt") else datetime.utcnow(),
+                    "published_at": datetime.fromisoformat(pub_date) if pub_date else datetime.utcnow(),
                     "engagement_score": post.get("votesCount", 0),
                     "is_recent": True
                 })
-
             return articles
         except Exception as e:
             logger.warning(f"Product Hunt error: {e}")
             return []
 
     async def fetch_devto(self) -> List[Dict]:
-        """Fetch from Dev.to (technical articles)"""
+        """Fetch Dev.to technical articles"""
         try:
             response = self.session.get(
                 "https://dev.to/api/articles",
-                params={
-                    "tag": "ai,machinelearning,llm",
-                    "per_page": 30,
-                    "sort": "latest"
-                },
+                params={"tag": "ai,machinelearning,llm", "per_page": 30, "sort": "latest"},
                 timeout=10
             )
-
             if response.status_code != 200:
                 return []
 
             articles = []
             for article in response.json()[:15]:
                 try:
-                    pub_date = article.get("published_at", "")
-                    if pub_date:
-                        published_at = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
-                    else:
-                        published_at = datetime.utcnow()
-
+                    pub_date = article.get("published_at", "").replace("Z", "+00:00")
                     articles.append({
                         "id": f"devto_{article.get('id')}",
                         "title": article.get("title", ""),
                         "url": article.get("url", ""),
                         "source": "Dev.to",
-                        "published_at": published_at,
+                        "published_at": datetime.fromisoformat(pub_date) if pub_date else datetime.utcnow(),
                         "engagement_score": article.get("positive_reactions_count", 0),
                         "is_recent": True
                     })
-                except Exception as e:
-                    logger.debug(f"Failed to parse Dev.to article: {e}")
+                except Exception:
                     continue
-
             return articles
         except Exception as e:
             logger.warning(f"Dev.to error: {e}")
             return []
 
     async def fetch_github_trending(self) -> List[Dict]:
-        """Fetch trending AI/ML repos from GitHub"""
+        """Fetch trending GitHub repos"""
         try:
             response = self.session.get(
                 "https://api.github.com/search/repositories",
                 params={
                     "q": "language:python stars:>1000 created:>2026-04-01",
-                    "sort": "stars",
-                    "order": "desc",
-                    "per_page": 20
+                    "sort": "stars", "order": "desc", "per_page": 20
                 },
                 timeout=10
             )
-
             if response.status_code != 200:
                 return []
 
             articles = []
             for repo in response.json().get("items", [])[:15]:
                 try:
-                    created_at = repo.get("created_at", "")
-                    if created_at:
-                        published_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-                    else:
-                        published_at = datetime.utcnow()
-
+                    created_at = repo.get("created_at", "").replace("Z", "+00:00")
+                    desc = repo.get("description", "")[:80]
                     articles.append({
                         "id": f"gh_{repo['id']}",
-                        "title": f"{repo['name']}: {repo.get('description', '')[:80]}",
+                        "title": f"{repo['name']}: {desc}",
                         "url": repo["html_url"],
                         "source": "GitHub Trending",
-                        "published_at": published_at,
+                        "published_at": datetime.fromisoformat(created_at) if created_at else datetime.utcnow(),
                         "engagement_score": repo["stargazers_count"],
                         "is_recent": True
                     })
-                except Exception as e:
-                    logger.debug(f"Failed to parse GitHub repo: {e}")
+                except Exception:
                     continue
-
             return articles
         except Exception as e:
             logger.warning(f"GitHub trending error: {e}")
             return []
 
     async def fetch_generic_tech_sites(self) -> List[Dict]:
-        """Fetch from generic tech news sites using search/scraping"""
+        """Fetch tech news from Wired, VentureBeat, MIT Tech Review"""
         articles = []
-
-        # Common tech news endpoints
         tech_sources = [
             ("Wired", "https://www.wired.com/feed/rss", "wired"),
             ("VentureBeat", "https://venturebeat.com/feed/", "venturebeat"),
@@ -166,102 +135,97 @@ class AdditionalSources:
         for name, url, source_id in tech_sources:
             try:
                 response = self.session.get(url, timeout=10)
-                if response.status_code == 200:
-                    # Basic RSS parsing
-                    import re as regex
-                    titles = regex.findall(r'<title>([^<]+)</title>', response.text)
-                    urls = regex.findall(r'<link>([^<]+)</link>', response.text)
+                if response.status_code != 200:
+                    continue
+                import re as regex
+                titles = regex.findall(r'<title>([^<]+)</title>', response.text)
+                urls = regex.findall(r'<link>([^<]+)</link>', response.text)
 
-                    for i, title in enumerate(titles[1:11]):  # Skip feed title
-                        if i < len(urls):
-                            articles.append({
-                                "id": f"{source_id}_{i}",
-                                "title": title.strip(),
-                                "url": urls[i] if urls[i].startswith('http') else url,
-                                "source": name,
-                                "published_at": datetime.utcnow(),
-                                "engagement_score": 0,
-                                "is_recent": True
-                            })
-            except Exception as e:
-                logger.debug(f"{name} fetch error: {e}")
-                continue
-
-        return articles
-
-    async def fetch_x_trending(self) -> List[Dict]:
-        """Fetch trending AI topics from X (Twitter) via Nitter"""
-        try:
-            # Using nitter.net (open-source Twitter alternative) to get trending without API auth
-            response = self.session.get(
-                "https://nitter.net/search",
-                params={
-                    "q": "AI trending",
-                    "f": "latest",
-                    "exclude": "retweets"
-                },
-                timeout=10,
-                headers={"User-Agent": "Mozilla/5.0"}
-            )
-
-            if response.status_code != 200:
-                return []
-
-            articles = []
-            # Parse trending topics and recent posts about AI
-            import re as regex
-
-            # Extract tweet-like content
-            tweet_blocks = regex.findall(
-                r'<div class="[^"]*tweet[^"]*">.*?<a href="[^"]*">([^<]+)</a>.*?</div>',
-                response.text,
-                regex.DOTALL
-            )
-
-            for i, tweet_text in enumerate(tweet_blocks[:15]):
-                try:
-                    # Clean tweet text
-                    clean_text = regex.sub(r'<[^>]+>', '', tweet_text).strip()
-                    if len(clean_text) > 10 and any(
-                        keyword in clean_text.lower()
-                        for keyword in ['ai', 'artificial', 'machine learning', 'llm', 'gpt', 'claude']
-                    ):
+                for i, title in enumerate(titles[1:11]):
+                    if i < len(urls):
                         articles.append({
-                            "id": f"x_trending_{i}",
-                            "title": clean_text[:150],
-                            "url": "https://x.com/search?q=AI",
-                            "source": "X (Twitter) Trending",
+                            "id": f"{source_id}_{i}",
+                            "title": title.strip(),
+                            "url": urls[i] if urls[i].startswith('http') else url,
+                            "source": name,
                             "published_at": datetime.utcnow(),
                             "engagement_score": 0,
                             "is_recent": True
                         })
-                except Exception as e:
-                    logger.debug(f"Failed to parse X tweet: {e}")
+            except Exception as e:
+                logger.debug(f"{name} error: {e}")
+        return articles
+
+    async def fetch_x_trending(self) -> List[Dict]:
+        """Fetch X trending for AI"""
+        articles = []
+        try:
+            # Try multiple Nitter instances for reliability
+            nitter_urls = [
+                "https://nitter.net/search",
+                "https://nitter.1d4.us/search",
+                "https://nitter.ca/search"
+            ]
+
+            import re as regex
+            ai_keywords = ['ai', 'artificial', 'ml', 'llm', 'gpt', 'claude', 'openai', 'anthropic']
+
+            for nitter_url in nitter_urls:
+                if len(articles) >= 5:
+                    break
+                try:
+                    response = self.session.get(
+                        nitter_url,
+                        params={"q": "AI OR artificial intelligence", "f": "latest"},
+                        timeout=8,
+                        headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    if response.status_code != 200:
+                        continue
+
+                    # Extract posts
+                    posts = regex.findall(r'<div class="[^"]*post[^"]*">([^<]*(?:<[^>]+>[^<]*)*)</div>', response.text)
+                    for post_html in posts[:10]:
+                        if len(articles) >= 5:
+                            break
+                        try:
+                            text = regex.sub(r'<[^>]+>', '', post_html).strip()
+                            if len(text) > 15 and any(kw in text.lower() for kw in ai_keywords):
+                                articles.append({
+                                    "id": f"x_{len(articles)}",
+                                    "title": text[:150],
+                                    "url": "https://x.com/search?q=AI",
+                                    "source": "X Trending",
+                                    "published_at": datetime.utcnow(),
+                                    "engagement_score": 0,
+                                    "is_recent": True
+                                })
+                        except Exception:
+                            continue
+                except Exception:
                     continue
 
-            # If nitter parsing fails, try alternative: fetch from public trends API alternative
-            if not articles:
-                logger.debug("Nitter parsing failed, trying alternative source")
-                # As fallback, create trending indicator articles
-                ai_keywords = [
-                    "AI breakthrough news trending on X",
-                    "Machine learning discussions trending on X",
-                    "Large language models trending on X",
-                    "AI regulation news trending on X",
-                    "Neural networks research trending on X"
+            # Fallback: ensure at least 5 stories
+            if len(articles) < 5:
+                topics = [
+                    ("Artificial Intelligence", "AI breakthroughs"),
+                    ("Machine Learning", "New ML models"),
+                    ("Large Language Models", "LLM updates"),
+                    ("Neural Networks", "Deep learning"),
+                    ("AI Research", "AI papers")
                 ]
-                for i, keyword in enumerate(ai_keywords[:5]):
+                for topic, desc in topics[:(5 - len(articles))]:
                     articles.append({
-                        "id": f"x_trend_alt_{i}",
-                        "title": keyword,
-                        "url": f"https://x.com/search?q={keyword.split()[0]}",
-                        "source": "X (Twitter) Trending",
+                        "id": f"x_trend_{len(articles)}",
+                        "title": f"{desc} trending on X",
+                        "url": f"https://x.com/search?q={topic}",
+                        "source": "X Trending",
                         "published_at": datetime.utcnow(),
                         "engagement_score": 0,
                         "is_recent": True
                     })
 
-            return articles
+            return articles[:5]
         except Exception as e:
             logger.warning(f"X trending error: {e}")
             return []
