@@ -14,8 +14,9 @@ class DiscordNotifier:
 
     # Color codes for different categories (Discord decimal color values)
     CATEGORY_COLORS = {
-        "models": 0x00b4d8,      # Blue
         "breaking": 0xff006e,    # Red/Pink
+        "models": 0x00b4d8,      # Blue
+        "agents": 0x2ecc71,      # Green
         "research": 0x8338ec,    # Purple
         "technical": 0xfbf007,   # Yellow
         "other": 0x606060        # Gray
@@ -126,8 +127,9 @@ class DiscordNotifier:
 
             # Category emojis
             cat_emojis = {
-                "models": "🚀",
                 "breaking": "🔥",
+                "models": "🚀",
+                "agents": "🤖",
                 "research": "🔬",
                 "technical": "⚙️",
                 "other": "📌",

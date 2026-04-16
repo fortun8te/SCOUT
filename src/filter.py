@@ -293,8 +293,9 @@ class FilterEngine:
     def categorize(self, articles: List[Dict]) -> Dict[str, List[Dict]]:
         """Categorize articles by content type with smart breaking news detection"""
         categories = {
-            "models": [],
             "breaking": [],
+            "models": [],
+            "agents": [],
             "research": [],
             "technical": [],
             "other": []
@@ -304,26 +305,34 @@ class FilterEngine:
         breaking_patterns = [
             r"GPT-[5-9]", r"Claude [4-9]", r"o1", r"o3", r"gemini [3-9]",
             r"announce.*available", r"just released", r"now available",
-            r"exclusive.*announcement", r"official.*launch",
+            r"launches", r"unveils", r"exclusive", r"official launch",
             r"Anthropic announces", r"OpenAI announces", r"Google announces",
-            r"breakthrough", r"game-changing", r"revolutionary"
+            r"breakthrough", r"game-changing", r"revolutionary",
+            r"acquisition", r"funding", r"raised \$"
         ]
 
         for article in articles:
             title = article.get("title", "").lower()
+            source = article.get("source", "")
             score = article.get("relevance_score", 0)
 
             # High-priority breaking news (score + keywords)
-            if score > 0.85 and any(re.search(p, title, re.IGNORECASE) for p in breaking_patterns):
+            if score > 0.7 and any(re.search(p, title, re.IGNORECASE) for p in breaking_patterns):
                 categories["breaking"].append(article)
-            # Model releases
+            # Model releases (Claude, GPT, Gemini, Llama, etc.)
             elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["model_release"]["patterns"]):
                 categories["models"].append(article)
-            # Leaks and rumors
+            # Agents and agentic AI
+            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["agents"]["patterns"]):
+                categories["agents"].append(article)
+            # Leaks and rumors → breaking
             elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["leaks"]["patterns"]):
                 categories["breaking"].append(article)
+            # Reasoning models → models
+            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["reasoning"]["patterns"]):
+                categories["models"].append(article)
             # Research papers
-            elif article.get("source") == "ArXiv":
+            elif "ArXiv" in source or "research" in title or "paper" in title:
                 categories["research"].append(article)
             # Technical methods
             elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["method"]["patterns"]):
