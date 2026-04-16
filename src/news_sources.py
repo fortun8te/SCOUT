@@ -178,10 +178,12 @@ class NewsSourceAggregator:
                                     description = desc_clean[:500]
                                     break
 
+                        image_url = self._extract_rss_image(item, link)
+
                         # Stable ID based on URL hash (for proper dedup)
                         url_hash = hashlib.md5(link.encode()).hexdigest()[:12]
 
-                        articles.append({
+                        article = {
                             "id": f"{source_id}_{url_hash}",
                             "title": title[:200],
                             "url": link,
@@ -191,7 +193,10 @@ class NewsSourceAggregator:
                             "summary": description[:280] if description else "",
                             "engagement_score": 0,
                             "is_recent": (now - pub_date).total_seconds() < 86400,  # <24h
-                        })
+                        }
+                        if image_url:
+                            article["image_url"] = image_url
+                        articles.append(article)
                     except Exception as e:
                         logger.debug(f"Parse error in {source_name}: {e}")
                         continue
@@ -201,8 +206,87 @@ class NewsSourceAggregator:
                 continue
 
         if articles:
-            logger.info(f"Fetched {len(articles)} articles from RSS sources (last 48h)")
+            with_image = sum(1 for a in articles if a.get("image_url"))
+            logger.info(
+                f"Fetched {len(articles)} articles from RSS sources "
+                f"(last 48h, {with_image} with thumbnail)"
+            )
         return articles
+
+    @staticmethod
+    def _extract_rss_image(item, link: str) -> str:
+        """Extract a thumbnail URL from an RSS/Atom item in priority order.
+
+        Priority: media:thumbnail > media:content (image/*) > enclosure (image/*)
+        > itunes:image > first <img> in description/content:encoded
+        > YouTube hqdefault fallback.
+        """
+        from bs4 import BeautifulSoup
+        import re
+
+        def _valid(url: str) -> bool:
+            return bool(url) and url.startswith("http")
+
+        # 1. <media:thumbnail url="..."/>
+        thumb = item.find("media:thumbnail") or item.find("thumbnail")
+        if thumb is not None:
+            url = thumb.get("url") or thumb.get("href")
+            if _valid(url):
+                return url
+
+        # 2. <media:content url="..." type="image/*"/>
+        for media in item.find_all("media:content"):
+            url = media.get("url")
+            mtype = (media.get("type") or "").lower()
+            medium = (media.get("medium") or "").lower()
+            if _valid(url) and (mtype.startswith("image") or medium == "image"):
+                return url
+
+        # 3. <enclosure url="..." type="image/*"/>
+        for enc in item.find_all("enclosure"):
+            url = enc.get("url")
+            etype = (enc.get("type") or "").lower()
+            if _valid(url) and etype.startswith("image"):
+                return url
+
+        # 4. <itunes:image href="..."/>
+        itunes_img = item.find("itunes:image")
+        if itunes_img is not None:
+            url = itunes_img.get("href") or itunes_img.get("url")
+            if _valid(url):
+                return url
+
+        # 5. First <img src="..."> in <description> or <content:encoded>
+        for tag_name in ("content:encoded", "description", "summary", "content"):
+            el = item.find(tag_name)
+            if el is None:
+                continue
+            html = el.string or el.get_text()
+            if not html or "<img" not in html.lower():
+                continue
+            try:
+                img = BeautifulSoup(html, "html.parser").find("img")
+                src = img.get("src") or img.get("data-src") if img else None
+                if _valid(src):
+                    return src
+            except Exception:
+                pass
+
+        # 6. YouTube fallback: https://i.ytimg.com/vi/{VIDEO_ID}/hqdefault.jpg
+        yt_id_el = item.find("yt:videoId") or item.find("videoId")
+        video_id = yt_id_el.get_text(strip=True) if yt_id_el is not None else ""
+        if not video_id and link:
+            match = re.search(
+                r"(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)"
+                r"([A-Za-z0-9_-]{11})",
+                link,
+            )
+            if match:
+                video_id = match.group(1)
+        if video_id:
+            return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+
+        return ""
 
     async def fetch_all(self):
         """

@@ -205,6 +205,10 @@ class DiscordNotifier:
                     if description:
                         embed["description"] = description
 
+                    # Attach thumbnail image when feed provided one (small, right-side)
+                    if article.get("image_url"):
+                        embed["thumbnail"] = {"url": article["image_url"]}
+
                     # Timestamp (Discord renders as relative time)
                     if timestamp_iso:
                         embed["timestamp"] = timestamp_iso
