@@ -11,11 +11,14 @@ KEYWORDS = {
     # Model releases (new AI models) - SUPER TRENDING
     "model_release": {
         "patterns": [
-            r"GPT-\d+", r"Claude", r"Llama", r"Mixtral", r"Phi", r"Qwen",
+            r"GPT-?\d+", r"Claude\s?[\w\-]*", r"Llama\s?\d*", r"Mixtral",
+            r"Gemini\s?[\w\.-]*", r"Phi\s?\d*", r"Qwen\s?[\w\.-]*",
+            r"DeepSeek\s?[\w\.-]*", r"Kimi", r"Yi\s?\d*", r"Mistral\s?[\w\.-]*",
+            r"Grok\s?[\w\.-]*", r"Granite\s?[\w\.-]*", r"ChatGLM",
             r"released", r"launch", r"announce.*available", r"beta", r"alpha",
             r"new model", r"model.*available", r"model drops", r"breaking.*release"
         ],
-        "weight": 0.40  # Increased - YouTubers LOVE model releases
+        "weight": 0.40  # YouTubers LOVE model releases
     },
     # Reasoning/Thinking models (o1, o3, Chain of Thought) - HOT TOPIC
     "reasoning": {

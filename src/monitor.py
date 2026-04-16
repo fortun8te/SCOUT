@@ -235,12 +235,30 @@ async def main():
         )
 
         if new_articles:
-            # Keep only top 1-5 articles by relevance score
-            top_articles = sorted(
+            # Keep only top 1-5 articles with SOURCE DIVERSITY
+            # (max 2 from same source to avoid one source dominating)
+            ranked = sorted(
                 new_articles,
                 key=lambda x: x.get("relevance_score", 0),
                 reverse=True
-            )[:5]  # Max 5 articles
+            )
+            top_articles = []
+            source_counts = {}
+            for article in ranked:
+                src = article.get("source", "Unknown")
+                if source_counts.get(src, 0) >= 2:
+                    continue
+                top_articles.append(article)
+                source_counts[src] = source_counts.get(src, 0) + 1
+                if len(top_articles) >= 5:
+                    break
+            # Fallback: if diversity filter was too strict, fill with top-ranked
+            if len(top_articles) < 3:
+                for article in ranked:
+                    if article not in top_articles:
+                        top_articles.append(article)
+                        if len(top_articles) >= 5:
+                            break
 
             logger.info(
                 f"[CURATE] Filtered {len(new_articles)} articles down to top {len(top_articles)} by relevance"
