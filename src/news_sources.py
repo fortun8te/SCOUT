@@ -53,6 +53,23 @@ class NewsSourceAggregator:
         ("The Algorithmic Bridge", "https://www.thealgorithmicbridge.com/feed", "algobridge"),
         ("Latent Space", "https://www.latent.space/feed", "latentspace"),
         ("Every AI", "https://every.to/rss", "every"),
+        ("Simon Willison's Weblog", "https://simonwillison.net/atom/everything/", "simonw"),
+        ("The Information AI", "https://hnrss.org/newest?q=The+Information+AI", "the-information-ai"),
+        ("Stratechery (Ben Thompson)", "https://stratechery.com/feed/", "stratechery"),
+        ("Sequoia AI", "https://www.sequoiacap.com/feed/", "sequoia"),
+        ("a16z AI", "https://a16z.com/category/ai/feed/", "a16z-ai"),
+        ("MarkTechPost", "https://www.marktechpost.com/feed/", "marktechpost"),
+        ("Semianalysis", "https://www.semianalysis.com/feed", "semianalysis"),
+        ("AI Snake Oil", "https://www.aisnakeoil.com/feed", "aisnakeoil"),
+        ("Gary Marcus", "https://garymarcus.substack.com/feed", "garymarcus"),
+        ("One Useful Thing (Ethan Mollick)", "https://www.oneusefulthing.org/feed", "ethanmollick"),
+        ("The Gradient", "https://thegradient.pub/rss/", "thegradient"),
+        ("Unite AI", "https://www.unite.ai/feed/", "uniteai"),
+        ("AI News (SWE-ai)", "https://buttondown.email/ainews/rss", "swe-ai-news"),
+
+        # AI podcasts
+        ("All-In Podcast", "https://www.allinpodcast.co/rss.xml", "allin"),
+        ("Lex Fridman Podcast", "https://lexfridman.com/feed/podcast/", "lexfridman"),
 
         # AI YouTube channel RSS (video descriptions often link to news)
         ("Two Minute Papers", "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg", "2mp"),
@@ -61,6 +78,11 @@ class NewsSourceAggregator:
         ("Wes Roth", "https://www.youtube.com/feeds/videos.xml?channel_id=UCqcbQf6yw5KzRoDDcZ_wBSw", "wesroth"),
         ("Fireship", "https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA", "fireship"),
         ("Yannic Kilcher", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZHmQk67mSJgfCCTn7xBfew", "yannic"),
+
+        # AI subreddits (via old.reddit.com RSS)
+        ("r/LocalLLaMA", "https://old.reddit.com/r/LocalLLaMA/.rss", "reddit-localllama"),
+        ("r/singularity", "https://old.reddit.com/r/singularity/.rss", "reddit-singularity"),
+        ("r/StableDiffusion", "https://old.reddit.com/r/StableDiffusion/.rss", "reddit-sd"),
 
         # AI startup / funding focus
         ("Hacker News", "https://hnrss.org/newest?q=AI+OR+LLM+OR+GPT+OR+Claude+OR+Anthropic+OR+OpenAI", "hn-ai"),
