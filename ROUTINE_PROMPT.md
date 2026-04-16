@@ -14,9 +14,15 @@ Network Access: Trusted
 
 ---
 
+## Entrypoint
+
+Point the Routine command at `bash scripts/routine_entrypoint.sh` instead of `python src/monitor.py` — it guarantees no git operations occur. The wrapper sets `GIT_TERMINAL_PROMPT=0`, `cd`s into the repo root, and `exec`s the monitor so no post-run shell steps fire.
+
+---
+
 ## Prompt
 
-Execute the SCOUT AI news monitor autonomously. Run: `python src/monitor.py`
+Execute the SCOUT AI news monitor autonomously. Run: `bash scripts/routine_entrypoint.sh`
 
 The script will:
 1. Fetch news from 8+ sources in parallel (HackerNews, ArXiv, Reddit, Bluesky, Product Hunt, Dev.to, GitHub, NewsAPI)
@@ -38,7 +44,7 @@ Do NOT ask for confirmation. Execute the script, capture all output, and let it 
 1. Go to claude.ai/code/routines
 2. Create new routine
 3. Name: SCOUT
-4. Command: `python src/monitor.py`
+4. Command: `bash scripts/routine_entrypoint.sh`
 5. Schedule: `0 */6 * * * ` (every 6 hours UTC = 4 times/day)
 6. Add environment variables (if using routine UI):
    - DISCORD_BOT_TOKEN=your_new_token
