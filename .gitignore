@@ -48,3 +48,9 @@ error.log
 .DS_Store
 Thumbs.db
 .env
+
+# Runtime state (local only, don't commit)
+data/processed_news.json
+data/stats.json
+data/cache/
+
