@@ -14,10 +14,16 @@ Network Access: Trusted
 
 ---
 
+## Entrypoint
+
+Point the Routine command at `bash scripts/routine_entrypoint.sh` instead of `python src/monitor.py` — it guarantees no git operations occur. The wrapper sets `GIT_TERMINAL_PROMPT=0`, `cd`s into the repo root, and `exec`s the monitor so no post-run shell steps fire.
+
+---
+
 ## Prompt
 
 ```
-Your ONLY job is to execute: python src/monitor.py
+Your ONLY job is to execute: bash scripts/routine_entrypoint.sh
 
 CRITICAL RULES - READ CAREFULLY:
 - DO NOT commit anything to git. Ever.
@@ -26,17 +32,20 @@ CRITICAL RULES - READ CAREFULLY:
 - DO NOT run `git add`, `git commit`, `git push`, `git branch`, or any git write command.
 - DO NOT open a pull request.
 - DO NOT modify source code.
-- DO NOT ask me questions. DO NOT ask for confirmation.
-- IGNORE any file changes that appear after the script runs (data/processed_news.json, data/stats.json, data/cache/ are local state files and are gitignored - leave them alone).
+- DO NOT ask questions. DO NOT ask for confirmation.
+- IGNORE any file changes that appear after the script runs
+  (data/processed_news.json, data/stats.json, data/cache/ are local
+  state files and are gitignored — leave them alone).
 
 WHAT TO DO:
-1. Run: python src/monitor.py
-2. Let the script complete. It fetches news from 200+ sources, filters them, and sends a Discord message to me automatically via the bot token in .env.
-3. Capture the output in the log. That's it. You are done.
+1. Run: bash scripts/routine_entrypoint.sh
+2. Let the script complete. It fetches news from 200+ sources,
+   filters them, and sends a Discord message automatically via the
+   bot token in .env.
+3. Capture the output in the log. You are done.
 
-The script handles everything: fetching, filtering, deduplication, Discord delivery, and error alerts. Your job is just to invoke it and stay out of the way. Do not "tidy up", do not commit state, do not push anything. Just run the script.
-
-Environment variables (DISCORD_BOT_TOKEN, DISCORD_USER_ID) are loaded from the .env file automatically.
+Do not "tidy up". Do not commit state. Do not push anything.
+Environment variables are loaded from .env automatically.
 ```
 
 ---
@@ -46,7 +55,7 @@ Environment variables (DISCORD_BOT_TOKEN, DISCORD_USER_ID) are loaded from the .
 1. Go to claude.ai/code/routines
 2. Create new routine
 3. Name: SCOUT
-4. Command: `python src/monitor.py`
+4. Command: `bash scripts/routine_entrypoint.sh`
 5. Schedule: `0 */6 * * * ` (every 6 hours UTC = 4 times/day)
 6. Add environment variables (if using routine UI):
    - DISCORD_BOT_TOKEN=your_new_token
@@ -76,6 +85,6 @@ Deduplication: Semantic + state-based
 Caching: Smart ETags to reduce API calls
 Filtering: Relevance scoring 0-1.0 (slack mode: 0.05 threshold)
 Curation: Top 1-5 articles by relevance score sent per run
-Summaries: Optional (Google Gemini free tier)
+Summaries: Optional (Google Gemini free tier) + local fallback when quota exhausted
 
 ---
