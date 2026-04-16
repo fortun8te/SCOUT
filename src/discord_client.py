@@ -134,12 +134,9 @@ class DiscordNotifier:
 
             header_embed = {
                 "title": f"AI News — {date_str}",
-                "description": (
-                    f"{total_articles} stories from the last 48 hours\n"
-                    + " · ".join(breakdown_parts)
-                ),
+                "description": " · ".join(breakdown_parts) if breakdown_parts else f"{total_articles} stories",
                 "color": 0x2b2d31,  # Discord dark grey
-                "footer": {"text": "Next update in 6 hours"}
+                "footer": {"text": ""}
             }
 
             embeds.append(header_embed)
@@ -199,23 +196,14 @@ class DiscordNotifier:
                     # Category label (not emoji)
                     cat_label = category.upper()
 
+                    # Compact embed: title with description inline, minimal fields
                     embed = {
                         "title": title,
                         "url": url,
                         "color": cat_color,
-                        "author": {
-                            "name": f"{cat_label}  ·  {source}"
-                        },
-                        "footer": {"text": f"{source}"}
+                        "description": f"**{cat_label}** • {source}\n{description}" if description else f"**{cat_label}** • {source}",
+                        "footer": {"text": ""}  # Empty footer for compact look
                     }
-
-                    # Only add description if we have real content
-                    if description:
-                        embed["description"] = description
-
-                    # Attach thumbnail image when feed provided one (small, right-side)
-                    if article.get("image_url"):
-                        embed["thumbnail"] = {"url": article["image_url"]}
 
                     # Timestamp (Discord renders as relative time)
                     if timestamp_iso:
@@ -423,41 +411,13 @@ class DiscordNotifier:
             else:
                 trending_str = "None yet"
 
+            stats_line = f"Runs: {total_runs} | Articles: {total_sent} | Avg: {avg_per_run:.1f} | Discovery: {discovery_rate:.1%}"
+
             embed = {
-                "title": "SCOUT Daily Analytics",
+                "title": "SCOUT Analytics",
+                "description": f"{stats_line}\n**Top:** {top_source_str}\n**Trending:** {trending_str}",
                 "color": 0x1f77b4,
-                "fields": [
-                    {
-                        "name": "Runs",
-                        "value": str(total_runs),
-                        "inline": True
-                    },
-                    {
-                        "name": "Articles",
-                        "value": str(total_sent),
-                        "inline": True
-                    },
-                    {
-                        "name": "Avg/Run",
-                        "value": f"{avg_per_run:.1f}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Discovery",
-                        "value": f"{discovery_rate:.1%}",
-                        "inline": True
-                    },
-                    {
-                        "name": "Top Source",
-                        "value": top_source_str,
-                        "inline": False
-                    },
-                    {
-                        "name": "Trending",
-                        "value": trending_str,
-                        "inline": False
-                    }
-                ]
+                "footer": {"text": ""}
             }
 
             payload = {"embeds": [embed]}
