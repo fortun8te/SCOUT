@@ -8,62 +8,114 @@ logger = logging.getLogger(__name__)
 
 # Keyword weighting for relevance scoring
 KEYWORDS = {
-    # Model releases (new AI models)
+    # Model releases (new AI models) - SUPER TRENDING
     "model_release": {
         "patterns": [
             r"GPT-\d+", r"Claude", r"Llama", r"Mixtral", r"Phi", r"Qwen",
             r"released", r"launch", r"announce.*available", r"beta", r"alpha",
-            r"new model", r"model.*available"
+            r"new model", r"model.*available", r"model drops", r"breaking.*release"
         ],
-        "weight": 0.35
+        "weight": 0.40  # Increased - YouTubers LOVE model releases
+    },
+    # Reasoning/Thinking models (o1, o3, Chain of Thought) - HOT TOPIC
+    "reasoning": {
+        "patterns": [
+            r"o1", r"o3", r"reasoning model", r"thinking model", r"extended thinking",
+            r"chain.?of.?thought", r"structured reasoning", r"test.?time compute",
+            r"inference scaling", r"reasoning.*breakthrough"
+        ],
+        "weight": 0.38  # Very high - YouTubers talk about this constantly
     },
     # Anthropic specific news
     "anthropic_news": {
         "patterns": [
             r"Anthropic", r"Claude", r"Constitutional AI", r"Chroma",
-            r"Contextual Bandits", r"RLHF", r"Mythic"
+            r"Contextual Bandits", r"RLHF", r"Mythic", r"Claude.*release"
         ],
-        "weight": 0.32
+        "weight": 0.35
     },
-    # OpenAI and OpenClaw
+    # OpenAI and major releases
     "openai_news": {
         "patterns": [
             r"OpenAI", r"OpenClaw", r"o1", r"o3", r"GPT",
-            r"ChatGPT", r"Sora", r"DALLE"
+            r"ChatGPT", r"Sora", r"DALLE", r"GPT-?5", r"OpenAI.*announce"
         ],
-        "weight": 0.32
+        "weight": 0.35
+    },
+    # Agentic AI and Agents - TRENDING NOW
+    "agents": {
+        "patterns": [
+            r"agent", r"agentic", r"autonomous.*agent", r"AI agent", r"tool.*use",
+            r"function calling", r"multi-step", r"agent framework", r"prompt.*agent"
+        ],
+        "weight": 0.32  # Big topic in AI community
+    },
+    # Multimodal and vision - BIG DEAL
+    "multimodal": {
+        "patterns": [
+            r"multimodal", r"vision.*model", r"image.*understanding", r"video.*model",
+            r"audio.*model", r"voice.*AI", r"visual.*reasoning", r"seeing",
+            r"video generation", r"video.*AI"
+        ],
+        "weight": 0.30
     },
     # Image models and generation
     "image_models": {
         "patterns": [
             r"Midjourney", r"DALL-E", r"Flux", r"Stable Diffusion",
             r"image.*model", r"image generation", r"text-to-image",
-            r"vision.*model", r"multimodal"
+            r"image.*breakthrough"
         ],
         "weight": 0.28
     },
-    # Leaks and rumors
+    # Leaks and rumors (YouTubers LOVE this)
     "leaks": {
         "patterns": [
             r"leak", r"coming soon", r"rumor", r"alleged", r"unreleased",
-            r"codename", r"internal", r"roadmap", r"rumored"
+            r"codename", r"internal", r"roadmap", r"rumored", r"exclusive"
         ],
-        "weight": 0.25
+        "weight": 0.28  # Increased - very clickable
     },
     # Benchmarks and records
     "benchmark": {
         "patterns": [
             r"SOTA", r"state-of-the-art", r"record", r"beats", r"outperforms",
-            r"MMLU", r"HumanEval", r"benchmark", r"evaluation"
+            r"MMLU", r"HumanEval", r"benchmark", r"evaluation", r"best.*performance"
         ],
-        "weight": 0.30
+        "weight": 0.32
+    },
+    # Fine-tuning and training
+    "training": {
+        "patterns": [
+            r"fine.?tun", r"training.*AI", r"train.*model", r"LORA", r"LoRA",
+            r"custom.*model", r"personali[sz]ed.*AI", r"distillation"
+        ],
+        "weight": 0.26
     },
     # Technical methods and frameworks
     "method": {
         "patterns": [
-            r"fine-tun", r"LORA", r"RAG", r"prompt engineering", r"multimodal",
-            r"chain-of-thought", r"scaling laws", r"mixture of experts", r"sparse",
-            r"quantization", r"distillation", r"alignment", r"RLHF"
+            r"RAG", r"retrieval", r"prompt engineering", r"prompting",
+            r"scaling laws", r"mixture of experts", r"sparse models",
+            r"quantization", r"alignment", r"RLHF", r"Constitutional AI"
+        ],
+        "weight": 0.22
+    },
+    # AI Safety and Alignment
+    "safety": {
+        "patterns": [
+            r"safety", r"alignment", r"jailbreak", r"adversarial",
+            r"harmful", r"bias", r"fairness", r"trustworthy",
+            r"AGI.*safety", r"x-risk"
+        ],
+        "weight": 0.24
+    },
+    # Compute and Hardware
+    "compute": {
+        "patterns": [
+            r"GPU", r"TPU", r"computing power", r"inference.*speed",
+            r"faster.*AI", r"optimization", r"efficient.*model",
+            r"edge.*AI", r"mobile.*AI", r"on.*device"
         ],
         "weight": 0.20
     },
@@ -71,17 +123,17 @@ KEYWORDS = {
     "outages": {
         "patterns": [
             r"outage", r"down", r"offline", r"issue", r"bug",
-            r"error", r"broken", r"failed", r"degradation"
+            r"error", r"broken", r"failed", r"degradation", r"API.*broken"
         ],
-        "weight": 0.22
+        "weight": 0.18
     },
     # Company announcements
     "company": {
         "patterns": [
             r"OpenAI", r"Anthropic", r"Google", r"DeepMind", r"Meta",
-            r"Mistral", r"Stability AI", r"xAI", r"Together AI"
+            r"Mistral", r"Stability AI", r"xAI", r"Together AI", r"Hugging Face"
         ],
-        "weight": 0.10
+        "weight": 0.12
     }
 }
 
@@ -153,18 +205,19 @@ class FilterEngine:
         elif title_len > 60:
             score += 0.03
 
-        # 6. Company-specific news boost (0-0.05) - when major companies announce
-        major_companies = ["Anthropic", "OpenAI", "Google", "DeepMind", "Meta"]
+        # 6. Company-specific news boost (0-0.08) - when major companies announce
+        major_companies = ["Anthropic", "OpenAI", "Google", "DeepMind", "Meta", "xAI", "Mistral"]
         if any(company in title for company in major_companies):
-            score += 0.05
+            score += 0.08
 
-        # 7. Major model announcement boost (0-0.10) - GPT-5, Claude 4, Gemini 3, etc.
+        # 7. Major model announcement boost (0-0.12) - GPT-5, Claude 4, o1, o3, etc.
         major_model_patterns = [
             r"GPT-[5-9]", r"Claude [4-9]", r"Gemini [3-9]", r"Llama [3-9]",
-            r"o1", r"o3", r"Claude 4", r"GPT-5", r"Gemini 3"
+            r"o1", r"o3", r"Claude 4", r"GPT-5", r"Gemini 3", r"Grok",
+            r"reasoning model", r"thinking model"
         ]
         if any(re.search(pattern, title, re.IGNORECASE) for pattern in major_model_patterns):
-            score += 0.10
+            score += 0.12
 
         return min(1.0, score)
 
