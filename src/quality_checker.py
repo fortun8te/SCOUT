@@ -42,10 +42,10 @@ class QualityChecker:
         "kickstarter",
     ]
 
-    # Minimum quality thresholds
-    MIN_TITLE_LENGTH = 10  # Very lenient
-    MAX_TITLE_LENGTH = 300  # Allow longer titles
-    MIN_RELEVANCE_SCORE = 0.10  # Very low threshold
+    # Minimum quality thresholds (SLACK MODE)
+    MIN_TITLE_LENGTH = 5  # Super lenient
+    MAX_TITLE_LENGTH = 500  # Allow anything
+    MIN_RELEVANCE_SCORE = 0.05  # Basically allow everything
 
     def check_quality(self, article: Dict) -> tuple[bool, str]:
         """

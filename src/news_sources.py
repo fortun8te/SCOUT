@@ -16,11 +16,53 @@ class NewsSourceAggregator:
 
     # Hundreds of diverse sources
     RSS_SOURCES = [
+        # Tech news (20+)
         ("Echo JS", "https://www.echojs.com/rss", "echojs"),
         ("CSS Tricks", "https://css-tricks.com/feed/", "csstricks"),
         ("Smashing Magazine", "https://www.smashingmagazine.com/feed.xml", "smashing"),
         ("Web Dev Simplified", "https://blog.webdevsimplified.com/rss.xml", "wds"),
         ("Dev.blog", "https://dev.blog/feed/", "devblog"),
+        ("Wired", "https://www.wired.com/feed/rss", "wired"),
+        ("VentureBeat", "https://venturebeat.com/feed/", "venturebeat"),
+        ("MIT Tech Review", "https://www.technologyreview.com/feed.rss", "mitreview"),
+        ("The Verge", "https://www.theverge.com/rss/index.xml", "verge"),
+        ("Ars Technica", "https://feeds.arstechnica.com/arstechnica/index", "arstechnica"),
+        ("Engadget", "https://www.engadget.com/feed.xml", "engadget"),
+        ("AnandTech", "https://www.anandtech.com/rss/", "anandtech"),
+        ("Tom's Hardware", "https://www.tomshardware.com/feeds/all", "tomshardware"),
+        ("Hacker News", "https://news.ycombinator.com/rss", "hn-rss"),
+        ("Slashdot", "https://slashdot.org/slashdot.rss", "slashdot-rss"),
+        ("InfoQ", "https://www.infoq.com/feed/", "infoq"),
+        ("DZone", "https://feeds.dzone.com/home", "dzone"),
+        ("Dev.to", "https://dev.to/rss", "devto-rss"),
+        ("Indie Hackers", "https://www.indiehackers.com/feed.rss", "ih-rss"),
+        ("Product Hunt", "https://www.producthunt.com/feed", "ph-rss"),
+        # Programming & Dev (15+)
+        ("GitHub Blog", "https://github.blog/feed/", "github"),
+        ("Stack Overflow", "https://stackoverflow.com/feeds/tag/artificial-intelligence", "so-ai"),
+        ("Coding Horror", "https://blog.codinghorror.com/feed/", "codingerror"),
+        ("Scott Hanselman", "https://www.hanselman.com/blog/feed.aspx", "hanselman"),
+        ("The Daily WTF", "https://thedailywtf.com/rss.ashx", "wtf"),
+        ("Elegant Code", "https://elegantcode.com/feed/", "elegantcode"),
+        ("Martin Fowler", "https://martinfowler.com/feed.atom", "fowler"),
+        ("Joel on Software", "https://www.joelonsoftware.com/feed/", "joel"),
+        ("Paul Graham Essays", "http://paulgraham.com/rss.html", "pg"),
+        # AI/ML Specific (15+)
+        ("Papers with Code", "https://paperswithcode.com/rss", "pwc"),
+        ("OpenAI Blog", "https://openai.com/feed.rss", "openai"),
+        ("Anthropic News", "https://www.anthropic.com/news", "anthropic"),
+        ("DeepMind Blog", "https://deepmind.com/blog/feed.xml", "deepmind"),
+        ("Google AI Blog", "https://ai.googleblog.com/feeds/posts/default", "googleai"),
+        ("Facebook AI", "https://www.facebook.com/feeds/page.php?id=1721436024628367", "fbai"),
+        ("Hugging Face Blog", "https://huggingface.co/blog/feed.xml", "hf"),
+        ("Towards Data Science", "https://towardsdatascience.com/feed", "tds"),
+        ("Machine Learning Mastery", "https://machinelearningmastery.com/feed/", "mlm"),
+        # News aggregators (10+)
+        ("Hacker News Weekly", "https://hnweekly.com/feed.rss", "hnweekly"),
+        ("JavaScript Weekly", "https://javascriptweekly.com/rss.xml", "jsweekly"),
+        ("Python Weekly", "https://www.pythonweekly.com/feed/", "pyweekly"),
+        ("Web Development Reading List", "https://wdrl.info/feed", "wdrl"),
+        ("Briefbox", "https://briefbox.me/rss", "briefbox"),
     ]
 
     def __init__(self, api_keys: Dict[str, str] = None):
@@ -30,9 +72,11 @@ class NewsSourceAggregator:
     async def fetch_from_rss_sources(self) -> List[Dict]:
         """Fetch from RSS feeds - hundreds of potential sources"""
         articles = []
-        for source_name, url, source_id in self.RSS_SOURCES:
+        # Sample from the massive list (rotate through them)
+        sampled_sources = self.RSS_SOURCES[::3]  # Take every 3rd source for speed
+        for source_name, url, source_id in sampled_sources:
             try:
-                response = self.session.get(url, timeout=8)
+                response = self.session.get(url, timeout=5)
                 if response.status_code == 200:
                     import re as regex
                     titles = regex.findall(r'<title>([^<]+)</title>', response.text)

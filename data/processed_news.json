@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-04-15T23:54:43.126147Z",
+  "last_run": "2026-04-16T00:03:16.415083Z",
   "processed_articles": {
     "gh_1201173969": {
       "title": "caveman: \ud83e\udea8 why use many token when few token do trick \u2014 Claude Code skill that cuts 65% o",
@@ -798,12 +798,201 @@
       "source": "Web Dev Simplified",
       "processed_at": "2026-04-15T23:54:43.126025Z",
       "score": 0.2
+    },
+    "infoq_4": {
+      "title": "Claude Code Used to Find Remotely Exploitable Linux Kernel Vulnerability Hidden for 23 Years",
+      "url": "https://www.infoq.com/news/2026/04/zendesk-absorption-capacity/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414912Z",
+      "score": 0.2957142857142857
+    },
+    "infoq_7": {
+      "title": "Anthropic Paper Examines Behavioral Impact of Emotion-Like Mechanisms in LLMs",
+      "url": "https://www.infoq.com/news/2026/04/rowhammer-attacks-nvidia/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414929Z",
+      "score": 0.2757142857142857
+    },
+    "infoq_1": {
+      "title": "Google\u2019s TurboQuant Compression May Support Faster Inference, Same Accuracy on Less Capable Hardware",
+      "url": "https://www.infoq.com/news/2026/04/opentelemetry-declarative-config/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414932Z",
+      "score": 0.2611111111111111
+    },
+    "infoq_2": {
+      "title": "Presentation: Empower Your Developers: How Open Source Dependencies Risk Management Can Unlock Innovation",
+      "url": "https://www.infoq.com/news/2026/04/turboquant-compression-kv-cache/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414937Z",
+      "score": 0.25
+    },
+    "infoq_3": {
+      "title": "Zendesk Says AI Makes Code Abundant, Shifting the Bottleneck to \u201cAbsorption Capacity\u201d",
+      "url": "https://www.infoq.com/presentations/open-source-dependencies/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414939Z",
+      "score": 0.25
+    },
+    "infoq_8": {
+      "title": "Presentation: Platform Engineering: Lessons from the Rise and Fall of eBay Velocity",
+      "url": "https://www.infoq.com/news/2026/04/anthropic-paper-llms/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414941Z",
+      "score": 0.25
+    },
+    "infoq_9": {
+      "title": "Article: Beyond One-Click: Designing an Enterprise-Grade Observability Extension for Docker",
+      "url": "https://www.infoq.com/presentations/platform-engineering-lessons/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414944Z",
+      "score": 0.25
+    },
+    "infoq_0": {
+      "title": "OpenTelemetry Declarative Configuration Reaches Stability Milestone",
+      "url": "https://www.infoq.com",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414952Z",
+      "score": 0.23
+    },
+    "infoq_5": {
+      "title": "Article: Using AWS Lambda Extensions to Run Post-Response Telemetry Flush",
+      "url": "https://www.infoq.com/news/2026/04/claude-code-linux-vulnerability/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414956Z",
+      "score": 0.23
+    },
+    "infoq_6": {
+      "title": "New Rowhammer Attacks on NVIDIA GPUs Enable Full System Takeover",
+      "url": "https://www.infoq.com/articles/lambda-extension-deferred-flush/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414958Z",
+      "score": 0.23
+    },
+    "infoq_10": {
+      "title": "Airbnb Migrates High-Volume Metrics Pipeline to OpenTelemetry",
+      "url": "https://www.infoq.com/articles/enterprise-grade-observability-extension-docker/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global",
+      "source": "InfoQ",
+      "processed_at": "2026-04-16T00:03:16.414960Z",
+      "score": 0.23
+    },
+    "slashdot_0": {
+      "title": "Slashdot",
+      "url": "https://slashdot.org/",
+      "source": "Slashdot",
+      "processed_at": "2026-04-16T00:03:16.414962Z",
+      "score": 0.2
+    },
+    "joel_0": {
+      "title": "Joel on Software",
+      "url": "https://www.joelonsoftware.com",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414969Z",
+      "score": 0.2
+    },
+    "joel_1": {
+      "title": "Progress on the Block Protocol",
+      "url": "https://www.joelonsoftware.com",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414971Z",
+      "score": 0.2
+    },
+    "joel_2": {
+      "title": "Making the web better. With blocks!",
+      "url": "https://www.joelonsoftware.com/2022/12/19/progress-on-the-block-protocol/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414973Z",
+      "score": 0.2
+    },
+    "joel_3": {
+      "title": "Kinda a big announcement",
+      "url": "https://www.joelonsoftware.com/2022/01/27/making-the-web-better-with-blocks/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414975Z",
+      "score": 0.2
+    },
+    "joel_4": {
+      "title": "HASH: a free, online platform for modeling the world",
+      "url": "https://www.joelonsoftware.com/2021/06/02/kinda-a-big-announcement/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414977Z",
+      "score": 0.2
+    },
+    "joel_5": {
+      "title": "So, how&#8217;s that retirement thing going, anyway?",
+      "url": "https://www.joelonsoftware.com/2020/06/18/hash-a-free-online-platform-for-modeling-the-world/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414979Z",
+      "score": 0.2
+    },
+    "joel_6": {
+      "title": "Welcome, Prashanth!",
+      "url": "https://www.joelonsoftware.com/2019/12/05/so-hows-that-retirement-thing-going-anyway/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414981Z",
+      "score": 0.2
+    },
+    "joel_7": {
+      "title": "The next CEO of Stack Overflow",
+      "url": "https://www.joelonsoftware.com/2019/09/24/announcing-stack-overflows-new-ceo/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414983Z",
+      "score": 0.2
+    },
+    "joel_8": {
+      "title": "Announcing Stack Overflow for Teams",
+      "url": "https://www.joelonsoftware.com/2019/03/28/the-next-ceo-of-stack-overflow/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414985Z",
+      "score": 0.2
+    },
+    "joel_9": {
+      "title": "Strange and maddening rules",
+      "url": "https://www.joelonsoftware.com/2018/05/03/announcing-stack-overflow-for-teams/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414987Z",
+      "score": 0.2
+    },
+    "joel_10": {
+      "title": "A Dusting of Gamification",
+      "url": "https://www.joelonsoftware.com/2018/04/23/strange-and-maddening-rules/",
+      "source": "Joel on Software",
+      "processed_at": "2026-04-16T00:03:16.414989Z",
+      "score": 0.2
+    },
+    "jsweekly_0": {
+      "title": "MDN ditches React for web components in frontend rebuild",
+      "url": "https://javascriptweekly.com/",
+      "source": "JavaScript Weekly",
+      "processed_at": "2026-04-16T00:03:16.414991Z",
+      "score": 0.2
+    },
+    "jsweekly_1": {
+      "title": "What to know about JavaScript in 2026",
+      "url": "https://javascriptweekly.com/issues/781",
+      "source": "JavaScript Weekly",
+      "processed_at": "2026-04-16T00:03:16.414993Z",
+      "score": 0.2
+    },
+    "jsweekly_2": {
+      "title": "A new, major npm supply chain attack via Axios",
+      "url": "https://javascriptweekly.com/issues/780",
+      "source": "JavaScript Weekly",
+      "processed_at": "2026-04-16T00:03:16.414995Z",
+      "score": 0.2
+    },
+    "jsweekly_3": {
+      "title": "TypeScript 6.0, Next.js 16.2, and a new Node.js runtime",
+      "url": "https://javascriptweekly.com/issues/779",
+      "source": "JavaScript Weekly",
+      "processed_at": "2026-04-16T00:03:16.414997Z",
+      "score": 0.2
     }
   },
-  "run_count": 7,
+  "run_count": 8,
   "statistics": {
-    "total_processed": 114,
-    "sent_today": 32,
+    "total_processed": 141,
+    "sent_today": 27,
     "sources_checked": [
       "HackerNews",
       "ArXiv",
