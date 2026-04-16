@@ -182,20 +182,32 @@ CREDIBLE_SOURCES = {
     "ArXiv": 0.08,  # Lowered - user doesn't want research papers
 }
 
-# AI-related required keywords - article MUST contain at least one to pass
-AI_RELEVANCE_KEYWORDS = [
-    "ai", "artificial intelligence", "machine learning", "ml",
-    "openai", "anthropic", "claude", "gpt", "chatgpt",
-    "google", "deepmind", "gemini", "meta", "llama",
-    "mistral", "qwen", "alibaba", "hugging face", "huggingface",
-    "grok", "xai", "higgsfield", "stability", "cohere",
-    "model", "llm", "language model", "agent", "agentic",
-    "neural network", "transformer", "diffusion",
-    "reasoning", "multimodal", "vision model", "rag",
-    "fine-tun", "training", "inference", "alignment",
-    "openclaw", "opus", "sonnet", "haiku", "o1", "o3",
-    "midjourney", "dall-e", "flux", "sora", "veo",
-    "copilot", "cursor", "codex", "devin",
+# AI-related required keywords - article MUST match at least one to pass
+# Using regex with word boundaries to avoid false positives (e.g. "ai" in "paint")
+AI_RELEVANCE_PATTERNS = [
+    # Specific AI companies / labs
+    r"\bopenai\b", r"\banthropic\b", r"\bdeepmind\b", r"\bhugging ?face\b",
+    r"\bmistral\b", r"\bcohere\b", r"\bstability ?ai\b", r"\bxai\b",
+    r"\bhiggsfield\b", r"\bperplexity\b", r"\bnvidia\b",
+    r"\balibaba\b", r"\bbaidu\b", r"\bdeepseek\b", r"\bqwen\b", r"\bkimi\b",
+
+    # Specific models
+    r"\bclaude\b", r"\bchatgpt\b", r"\bgpt-?\d+", r"\bgemini\b", r"\bllama\b",
+    r"\bgrok\b", r"\bo[13]\b", r"\bopus\b", r"\bsonnet\b", r"\bhaiku\b",
+    r"\bmidjourney\b", r"\bdall-?e\b", r"\bflux\b", r"\bsora\b", r"\bveo\b",
+    r"\bgranite\b", r"\bphi-?\d+", r"\bmixtral\b",
+
+    # AI concepts / techniques
+    r"\bartificial intelligence\b", r"\bmachine learning\b",
+    r"\b(large )?language model\b", r"\bllm\b", r"\brag\b",
+    r"\btransformer\b", r"\bdiffusion model\b", r"\breasoning model\b",
+    r"\bmultimodal\b", r"\bvision model\b", r"\bfoundation model\b",
+    r"\bfine[-\s]?tun", r"\binference\b",
+    r"\bAI (agent|model|tool|framework|safety|alignment|breakthrough|startup|company|research|lab)\b",
+
+    # AI products / tools
+    r"\bcursor\b", r"\bcopilot\b", r"\bcodex\b", r"\bdevin\b",
+    r"\bagentic\b", r"\bAI agent\b",
 ]
 
 
@@ -210,9 +222,12 @@ class FilterEngine:
         title = article.get("title", "").lower()
         source = article.get("source", "")
 
-        # HARD REQUIREMENT: article must mention AI/ML topic in title
-        # Otherwise score = 0 (will be filtered out)
-        has_ai_keyword = any(kw in title for kw in AI_RELEVANCE_KEYWORDS)
+        # HARD REQUIREMENT: article must match an AI pattern in title
+        # Uses regex with word boundaries to avoid false positives
+        has_ai_keyword = any(
+            re.search(pattern, title, re.IGNORECASE)
+            for pattern in AI_RELEVANCE_PATTERNS
+        )
         if not has_ai_keyword:
             return 0.0
 

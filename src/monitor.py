@@ -156,6 +156,28 @@ async def main():
                 pass
             return
 
+        # HARD time window: only articles from last 8 hours
+        # This prevents resending old articles even when state file is missing
+        # (e.g., in cloud Routine runs where state doesn't persist)
+        from datetime import timedelta
+        cutoff = datetime.utcnow() - timedelta(hours=8)
+        fresh_articles = []
+        for a in all_articles:
+            pub = a.get("published_at")
+            if isinstance(pub, datetime):
+                if pub.tzinfo is not None:
+                    pub = pub.replace(tzinfo=None)
+                if pub >= cutoff:
+                    fresh_articles.append(a)
+            else:
+                # No date available — keep it (let filter/quality handle)
+                fresh_articles.append(a)
+        logger.info(
+            f"[RECENCY] Kept {len(fresh_articles)} articles from last 8h "
+            f"(dropped {len(all_articles) - len(fresh_articles)} older)"
+        )
+        all_articles = fresh_articles
+
         # Semantic deduplication (remove near-duplicates from same batch)
         logger.info("[DEDUP-BATCH] Running semantic deduplication...")
         deduplicated = deduplicator.find_duplicates(all_articles)
@@ -164,8 +186,8 @@ async def main():
             f"near-duplicates"
         )
 
-        # Filter and rank articles (strict - only quality news)
-        filter_engine = FilterEngine(threshold=0.35)
+        # Filter and rank articles (balance: filter AI-relevant but not too strict)
+        filter_engine = FilterEngine(threshold=0.20)
         filtered_articles = filter_engine.filter_and_rank(deduplicated)
         logger.info(
             f"[FILTER] ✓ Filtered to {len(filtered_articles)} "

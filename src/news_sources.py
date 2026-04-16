@@ -191,18 +191,15 @@ class NewsSourceAggregator:
         all_articles = []
         sources_checked = []
 
-        # Build parallel tasks - MASSIVE source list with 20+ sources
+        # Build parallel tasks - AI-focused sources only
+        # Disabled: Medium, Slashdot, Lobsters, Indie Hackers, Mastodon
+        # (too much generic tech noise, not AI-specific)
         tasks = [
-            self._fetch_hackernews(),
-            self._fetch_arxiv(),
-            self._fetch_reddit(),
-            self._fetch_lobsters(),
-            self._fetch_techcrunch(),
-            self._fetch_medium(),
-            self._fetch_indie_hackers(),
-            self._fetch_slashdot(),
-            self._fetch_mastodon(),
-            self.fetch_from_rss_sources(),
+            self._fetch_hackernews(),  # has AI-specific filtering
+            self._fetch_arxiv(),  # AI research
+            self._fetch_reddit(),  # r/MachineLearning, r/OpenAI etc
+            self._fetch_techcrunch(),  # TechCrunch (will be AI-filtered downstream)
+            self.fetch_from_rss_sources(),  # curated AI-only RSS list
         ]
 
         # Add optional sources if API keys provided
@@ -218,17 +215,12 @@ class NewsSourceAggregator:
             ("HackerNews", results[0]),
             ("ArXiv", results[1]),
             ("Reddit", results[2]),
-            ("Lobsters", results[3]),
-            ("TechCrunch", results[4]),
-            ("Medium", results[5]),
-            ("Indie Hackers", results[6]),
-            ("Slashdot", results[7]),
-            ("Mastodon", results[8]),
-            ("RSS Feeds (20+ sources)", results[9]),
+            ("TechCrunch", results[3]),
+            ("RSS Feeds", results[4]),
         ]
 
         if self.api_keys.get("newsapi_key"):
-            result_map.append(("NewsAPI", results[10]))
+            result_map.append(("NewsAPI", results[5]))
 
         for source_name, result in result_map:
             if isinstance(result, Exception):
