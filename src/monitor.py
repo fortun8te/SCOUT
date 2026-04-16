@@ -122,11 +122,12 @@ async def main():
         if bluesky_articles:
             sources_checked.append("Bluesky")
 
-        # Add additional sources (Product Hunt, Dev.to, GitHub trending)
-        logger.info("[SOURCES] Fetching Product Hunt, Dev.to, GitHub trending...")
-        additional_articles, additional_sources = await additional.fetch_all_additional()
-        all_articles.extend(additional_articles)
-        sources_checked.extend(additional_sources)
+        # Skip low-quality additional sources (Product Hunt, Dev.to, GitHub trending are marketing/spam)
+        # Comment this out to add them back if needed
+        # logger.info("[SOURCES] Fetching Product Hunt, Dev.to, GitHub trending...")
+        # additional_articles, additional_sources = await additional.fetch_all_additional()
+        # all_articles.extend(additional_articles)
+        # sources_checked.extend(additional_sources)
 
         logger.info(
             f"[FETCH] ✓ Fetched {len(all_articles)} total articles "
@@ -163,8 +164,8 @@ async def main():
             f"near-duplicates"
         )
 
-        # Filter and rank articles (VERY lenient - get everything)
-        filter_engine = FilterEngine(threshold=0.05)
+        # Filter and rank articles (strict - only quality news)
+        filter_engine = FilterEngine(threshold=0.35)
         filtered_articles = filter_engine.filter_and_rank(deduplicated)
         logger.info(
             f"[FILTER] ✓ Filtered to {len(filtered_articles)} "
@@ -187,16 +188,16 @@ async def main():
         if len(new_articles) == 0:
             logger.warning("[SAFETY] Zero new articles after state dedup. Engaging progressive fallback...")
 
-            # Tier 1: Lower filter threshold to 0.01
-            loose_filter = FilterEngine(threshold=0.01)
+            # Tier 1: Lower filter threshold to 0.25 (still strict)
+            loose_filter = FilterEngine(threshold=0.25)
             tier1 = quality_checker.filter_articles(loose_filter.filter_and_rank(deduplicated))
             new_articles = state.get_new_articles(tier1)
             if new_articles:
-                logger.info(f"[SAFETY] Tier 1 recovered {len(new_articles)} articles (threshold=0.01)")
+                logger.info(f"[SAFETY] Tier 1 recovered {len(new_articles)} articles (threshold=0.25)")
 
-            # Tier 2: Skip quality checker entirely
+            # Tier 2: Skip quality checker but keep threshold strict
             if len(new_articles) == 0:
-                tier2 = FilterEngine(threshold=0.01).filter_and_rank(deduplicated)
+                tier2 = FilterEngine(threshold=0.25).filter_and_rank(deduplicated)
                 new_articles = state.get_new_articles(tier2)
                 if new_articles:
                     logger.info(f"[SAFETY] Tier 2 recovered {len(new_articles)} articles (no quality check)")
