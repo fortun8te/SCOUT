@@ -259,14 +259,38 @@ async def main():
         if new_articles:
             # Keep only top 1-5 articles with SOURCE DIVERSITY
             # (max 2 from same source to avoid one source dominating)
+            import re as _re
             ranked = sorted(
                 new_articles,
                 key=lambda x: x.get("relevance_score", 0),
                 reverse=True
             )
+
+            # GUARANTEE: at least one Claude-related article if any exist
+            claude_pattern = _re.compile(
+                r"\b(claude|anthropic|opus|sonnet|haiku)\b", _re.IGNORECASE
+            )
+            claude_articles = [
+                a for a in ranked
+                if claude_pattern.search(a.get("title", ""))
+                or claude_pattern.search(a.get("summary", ""))
+            ]
+
             top_articles = []
             source_counts = {}
+
+            # Seed with top Claude article if available
+            if claude_articles:
+                top_articles.append(claude_articles[0])
+                source_counts[claude_articles[0].get("source", "Unknown")] = 1
+                logger.info(
+                    f"[CLAUDE] Seeded digest with: {claude_articles[0].get('title', '')[:60]}"
+                )
+
+            # Fill the rest with top-ranked, respecting source diversity
             for article in ranked:
+                if article in top_articles:
+                    continue
                 src = article.get("source", "Unknown")
                 if source_counts.get(src, 0) >= 2:
                     continue
