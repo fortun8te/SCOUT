@@ -33,6 +33,7 @@ from src.additional_sources import AdditionalSources
 from src.webhook_handler import WebhookHandler
 from src.bot_status import BotStatusManager
 from src.quality_checker import QualityChecker
+from src.content_extractor import content_extractor
 
 # Configure logging
 logging.basicConfig(
@@ -232,6 +233,32 @@ async def main():
                     key=lambda x: x.get("relevance_score", 0),
                     reverse=True,
                 )[:5]
+
+        # Enrich top articles with full page content (for thin RSS summaries)
+        if new_articles:
+            try:
+                top_for_enrich = sorted(
+                    new_articles,
+                    key=lambda x: x.get("relevance_score", 0),
+                    reverse=True,
+                )[:10]
+                needs_enrich = [
+                    a for a in top_for_enrich
+                    if len(a.get("summary", "") or "") < 100 and a.get("url")
+                ]
+                enriched_count = 0
+                if needs_enrich:
+                    results = await asyncio.gather(
+                        *(content_extractor.extract(a["url"], timeout=5) for a in needs_enrich),
+                        return_exceptions=True,
+                    )
+                    for article, text in zip(needs_enrich, results):
+                        if isinstance(text, str) and text:
+                            article["summary"] = text
+                            enriched_count += 1
+                logger.info(f"[ENRICH] Extracted content for {enriched_count} articles")
+            except Exception as e:
+                logger.warning(f"[ENRICH] Enrichment failed: {e}")
 
         # Add summaries if enabled
         if summarizer.enabled and new_articles:
