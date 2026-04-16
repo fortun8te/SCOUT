@@ -1,0 +1,30 @@
+{
+  "total_articles_processed": 40,
+  "total_articles_sent": 0,
+  "runs": [
+    {
+      "timestamp": "2026-04-16T00:07:21.245522Z",
+      "articles_fetched": 40,
+      "articles_sent": 0,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.0
+    }
+  ],
+  "top_sources": {
+    "HackerNews": 1,
+    "ArXiv": 1,
+    "Reddit": 1,
+    "GitHub Trending": 1
+  },
+  "trending_keywords": {},
+  "category_distribution": {},
+  "hourly_distribution": {
+    "hour_00": 1
+  },
+  "discovery_rate": 0
+}
