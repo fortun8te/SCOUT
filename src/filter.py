@@ -286,6 +286,11 @@ class FilterEngine:
         if any(re.search(pattern, title, re.IGNORECASE) for pattern in major_model_patterns):
             score += 0.12
 
+        # 8. Trending boost: +0.10 per additional source (capped at +0.30)
+        trending_count = article.get("trending_source_count", 1)
+        if trending_count > 1:
+            score += min(0.30, (trending_count - 1) * 0.10)
+
         return min(1.0, score)
 
     def filter_and_rank(self, articles: List[Dict]) -> List[Dict]:

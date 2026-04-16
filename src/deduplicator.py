@@ -61,6 +61,69 @@ class DeduplicatorEngine:
 
         return unique
 
+    def detect_trending(
+        self, articles: List[Dict], threshold: float = 0.75
+    ) -> Dict[int, int]:
+        """
+        Detect trending stories covered by multiple sources.
+
+        Groups articles by title similarity and annotates the
+        highest-scoring representative of each cluster with
+        ``trending_source_count`` — how many distinct sources
+        covered the story.
+
+        Args:
+            articles: List of articles (typically already deduplicated)
+            threshold: 0-1.0, title similarity above this means
+                articles cover the same story
+
+        Returns:
+            Dict mapping id(article) -> source_count for the
+            representative article of each cluster.
+        """
+        if len(articles) < 2:
+            return {id(a): 1 for a in articles}
+
+        clusters: List[List[Dict]] = []
+
+        for article in articles:
+            title = article.get("title", "").lower()
+            placed = False
+
+            for cluster in clusters:
+                rep_title = cluster[0].get("title", "").lower()
+                similarity = self._calculate_similarity(title, rep_title)
+                if similarity >= threshold:
+                    cluster.append(article)
+                    placed = True
+                    break
+
+            if not placed:
+                clusters.append([article])
+
+        trending: Dict[int, int] = {}
+
+        for cluster in clusters:
+            # Count distinct sources in cluster
+            sources = {a.get("source", "") for a in cluster if a.get("source")}
+            source_count = len(sources)
+
+            # Representative = highest relevance_score (fallback 0)
+            representative = max(
+                cluster,
+                key=lambda a: a.get("relevance_score", 0) or 0,
+            )
+            representative["trending_source_count"] = source_count
+            trending[id(representative)] = source_count
+
+            if source_count > 1:
+                logger.debug(
+                    f"[TRENDING] {source_count} sources: "
+                    f"{representative.get('title', '')[:60]}..."
+                )
+
+        return trending
+
     @staticmethod
     def _calculate_similarity(text1: str, text2: str) -> float:
         """Calculate string similarity using SequenceMatcher"""
