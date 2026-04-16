@@ -47,7 +47,6 @@ error.log
 # OS
 .DS_Store
 Thumbs.db
-.env
 
 # Runtime state (local only, don't commit)
 data/processed_news.json

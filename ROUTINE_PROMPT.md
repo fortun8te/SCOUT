@@ -22,8 +22,14 @@ Point the Routine command at `bash scripts/routine_entrypoint.sh` instead of `py
 
 ## Prompt
 
+Paste this entire block into the Routine prompt. The `export` lines inject the Discord credentials (the Routine UI doesn't let us set env vars, and `.env` is gitignored so it's not in the cloud clone — so we put them directly in the prompt).
+
 ```
-Your ONLY job is to execute: bash scripts/routine_entrypoint.sh
+Your ONLY job is to run the command below.
+
+export DISCORD_BOT_TOKEN="<YOUR_DISCORD_BOT_TOKEN>"
+export DISCORD_USER_ID="<YOUR_DISCORD_USER_ID>"
+bash scripts/routine_entrypoint.sh
 
 CRITICAL RULES - READ CAREFULLY:
 - DO NOT commit anything to git. Ever.
@@ -38,14 +44,12 @@ CRITICAL RULES - READ CAREFULLY:
   state files and are gitignored — leave them alone).
 
 WHAT TO DO:
-1. Run: bash scripts/routine_entrypoint.sh
+1. Run the three commands above (export + bash).
 2. Let the script complete. It fetches news from 200+ sources,
-   filters them, and sends a Discord message automatically via the
-   bot token in .env.
+   filters them, and sends a Discord message via the exported token.
 3. Capture the output in the log. You are done.
 
 Do not "tidy up". Do not commit state. Do not push anything.
-Environment variables are loaded from .env automatically.
 ```
 
 ---
