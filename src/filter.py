@@ -313,55 +313,94 @@ class FilterEngine:
         )
         return filtered
 
+    # Specialized category patterns (money, controversy, people moves)
+    FUNDING_PATTERNS = [
+        r"raised \$\d", r"acquisition", r"acquires", r"acquired by",
+        r"valued at", r"valuation", r"Series [A-E]\b", r"\bIPO\b",
+        r"buyout", r"funding round", r"seed round", r"secures \$\d"
+    ]
+    DRAMA_PATTERNS = [
+        r"lawsuit", r"\bsued\b", r"suing", r"controversy", r"scandal",
+        r"fired", r"walked out", r"criticized", r"accused", r"\bbeef\b",
+        r"feud", r"backlash"
+    ]
+    PEOPLE_PATTERNS = [
+        r"\bjoins\b", r"\bleaves\b", r"departs", r"\bhired\b",
+        r"\bfounded\b", r"co-?founder", r"new CEO", r"stepped down",
+        r"resign", r"appointed"
+    ]
+
+    BREAKING_PATTERNS = [
+        r"GPT-[5-9]", r"Claude [4-9]", r"o1", r"o3", r"gemini [3-9]",
+        r"announce.*available", r"just released", r"now available",
+        r"launches", r"unveils", r"exclusive", r"official launch",
+        r"Anthropic announces", r"OpenAI announces", r"Google announces",
+        r"breakthrough", r"game-changing", r"revolutionary",
+        r"acquisition", r"funding", r"raised \$"
+    ]
+
+    CATEGORY_LABELS = {
+        "breaking": "[BREAKING]",
+        "models": "[RELEASE]",
+        "agents": "[AGENT]",
+        "funding": "[FUNDING]",
+        "drama": "[DRAMA]",
+        "people": "[PEOPLE]",
+        "research": "[PAPER]",
+        "technical": "[TECH]",
+        "other": "",
+    }
+
+    def _classify(self, article: Dict) -> str:
+        """Return the category key an article belongs to.
+
+        Order of precedence matches the public digest:
+        breaking > models > agents > funding > drama > people >
+        research > technical > other.
+        """
+        title = article.get("title", "").lower()
+        source = article.get("source", "")
+        score = article.get("relevance_score", 0)
+
+        def matches(patterns):
+            return any(re.search(p, title, re.IGNORECASE) for p in patterns)
+
+        if score > 0.7 and matches(self.BREAKING_PATTERNS):
+            return "breaking"
+        if matches(KEYWORDS["model_release"]["patterns"]):
+            return "models"
+        if matches(KEYWORDS["agents"]["patterns"]):
+            return "agents"
+        if matches(self.FUNDING_PATTERNS):
+            return "funding"
+        if matches(self.DRAMA_PATTERNS):
+            return "drama"
+        if matches(self.PEOPLE_PATTERNS):
+            return "people"
+        if matches(KEYWORDS["leaks"]["patterns"]):
+            return "breaking"
+        if matches(KEYWORDS["reasoning"]["patterns"]):
+            return "models"
+        if "ArXiv" in source or "research" in title or "paper" in title:
+            return "research"
+        if matches(KEYWORDS["method"]["patterns"]):
+            return "technical"
+        return "other"
+
     def categorize(self, articles: List[Dict]) -> Dict[str, List[Dict]]:
         """Categorize articles by content type with smart breaking news detection"""
-        categories = {
-            "breaking": [],
-            "models": [],
-            "agents": [],
-            "research": [],
-            "technical": [],
-            "other": []
-        }
-
-        # Breaking news patterns (high priority)
-        breaking_patterns = [
-            r"GPT-[5-9]", r"Claude [4-9]", r"o1", r"o3", r"gemini [3-9]",
-            r"announce.*available", r"just released", r"now available",
-            r"launches", r"unveils", r"exclusive", r"official launch",
-            r"Anthropic announces", r"OpenAI announces", r"Google announces",
-            r"breakthrough", r"game-changing", r"revolutionary",
-            r"acquisition", r"funding", r"raised \$"
-        ]
-
+        categories = {key: [] for key in self.CATEGORY_LABELS}
         for article in articles:
-            title = article.get("title", "").lower()
-            source = article.get("source", "")
-            score = article.get("relevance_score", 0)
-
-            # High-priority breaking news (score + keywords)
-            if score > 0.7 and any(re.search(p, title, re.IGNORECASE) for p in breaking_patterns):
-                categories["breaking"].append(article)
-            # Model releases (Claude, GPT, Gemini, Llama, etc.)
-            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["model_release"]["patterns"]):
-                categories["models"].append(article)
-            # Agents and agentic AI
-            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["agents"]["patterns"]):
-                categories["agents"].append(article)
-            # Leaks and rumors → breaking
-            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["leaks"]["patterns"]):
-                categories["breaking"].append(article)
-            # Reasoning models → models
-            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["reasoning"]["patterns"]):
-                categories["models"].append(article)
-            # Research papers
-            elif "ArXiv" in source or "research" in title or "paper" in title:
-                categories["research"].append(article)
-            # Technical methods
-            elif any(re.search(p, title, re.IGNORECASE) for p in KEYWORDS["method"]["patterns"]):
-                categories["technical"].append(article)
-            # Everything else
-            else:
-                categories["other"].append(article)
-
+            categories[self._classify(article)].append(article)
         return categories
+
+    def detect_label(self, article: Dict) -> str:
+        """Return a bracketed prefix label for an article headline.
+
+        Uses the article's existing ``category`` if set, otherwise classifies
+        on the fly. Returns an empty string for 'other' / unclassified.
+        """
+        category = article.get("category")
+        if category not in self.CATEGORY_LABELS:
+            category = self._classify(article)
+        return self.CATEGORY_LABELS[category]
