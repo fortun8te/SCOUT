@@ -54,3 +54,6 @@ data/processed_news.json
 data/stats.json
 data/cache/
 
+# Claude Code ephemeral worktrees
+.claude/worktrees/
+
