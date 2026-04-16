@@ -16,20 +16,28 @@ Network Access: Trusted
 
 ## Prompt
 
-Execute the SCOUT AI news monitor autonomously. Run: `python src/monitor.py`
+```
+Your ONLY job is to execute: python src/monitor.py
 
-The script will:
-1. Fetch news from 8+ sources in parallel (HackerNews, ArXiv, Reddit, Bluesky, Product Hunt, Dev.to, GitHub, NewsAPI)
-2. Filter articles by relevance (0.25 threshold minimum)
-3. Remove spam/clickbait/low-quality content
-4. Categorize: models, breaking news, research, technical, other
-5. Send high-priority breaking news immediately via Discord DM
-6. Send full batch digest with rich embeds every 6 hours
-7. Track analytics, trending keywords, and discovery rates
-8. Auto-deduplicate using semantic similarity + git state
-9. Send error alerts to Discord if anything fails
+CRITICAL RULES - READ CAREFULLY:
+- DO NOT commit anything to git. Ever.
+- DO NOT push to GitHub. Ever.
+- DO NOT create, switch, or merge branches. Ever.
+- DO NOT run `git add`, `git commit`, `git push`, `git branch`, or any git write command.
+- DO NOT open a pull request.
+- DO NOT modify source code.
+- DO NOT ask me questions. DO NOT ask for confirmation.
+- IGNORE any file changes that appear after the script runs (data/processed_news.json, data/stats.json, data/cache/ are local state files and are gitignored - leave them alone).
 
-Do NOT ask for confirmation. Execute the script, capture all output, and let it complete. Environment variables (DISCORD_BOT_TOKEN, DISCORD_USER_ID) are loaded from .env file automatically.
+WHAT TO DO:
+1. Run: python src/monitor.py
+2. Let the script complete. It fetches news from 200+ sources, filters them, and sends a Discord message to me automatically via the bot token in .env.
+3. Capture the output in the log. That's it. You are done.
+
+The script handles everything: fetching, filtering, deduplication, Discord delivery, and error alerts. Your job is just to invoke it and stay out of the way. Do not "tidy up", do not commit state, do not push anything. Just run the script.
+
+Environment variables (DISCORD_BOT_TOKEN, DISCORD_USER_ID) are loaded from the .env file automatically.
+```
 
 ---
 
@@ -49,27 +57,6 @@ Do NOT ask for confirmation. Execute the script, capture all output, and let it 
 
 ---
 
-## Copy This Into Routine Prompt
-
-```
-Execute the SCOUT AI news monitor autonomously. Run: python src/monitor.py
-
-The script will:
-1. Fetch news from 8+ sources in parallel (HackerNews, ArXiv, Reddit, Bluesky, Product Hunt, Dev.to, GitHub, NewsAPI)
-2. Filter articles by relevance (0.25 threshold minimum)
-3. Remove spam/clickbait/low-quality content
-4. Categorize: models, breaking news, research, technical, other
-5. Send high-priority breaking news immediately via Discord DM
-6. Send full batch digest with rich embeds every 6 hours
-7. Track analytics, trending keywords, and discovery rates
-8. Auto-deduplicate using semantic similarity + git state
-9. Send error alerts to Discord if anything fails
-
-Do NOT ask for confirmation. Execute the script, capture all output, and let it complete. Environment variables are loaded from .env file automatically.
-```
-
----
-
 ## Cost Analysis
 
 Every 6 hours = 4 executions per day = 120 per month
@@ -79,17 +66,16 @@ Total: 240k-600k tokens per month
 
 With Gemini for summaries: free (1,500 req/day)
 
-This is roughly 50% of the 3-hour schedule cost but gets more comprehensive research.
-
 ---
 
 ## Features
 
-Sources: 8+ news APIs
-Coverage: Models, Anthropic news, OpenAI, image generation, outages, technical articles
+Sources: 200+ news feeds/APIs
+Coverage: Models, Anthropic, OpenAI, image gen, outages, research, technical
 Deduplication: Semantic + state-based
 Caching: Smart ETags to reduce API calls
-Filtering: Relevance scoring 0-1.0
+Filtering: Relevance scoring 0-1.0 (slack mode: 0.05 threshold)
+Curation: Top 1-5 articles by relevance score sent per run
 Summaries: Optional (Google Gemini free tier)
 
 ---
