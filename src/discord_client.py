@@ -171,13 +171,27 @@ class DiscordNotifier:
                     source = article.get("source", "Unknown")
                     summary = article.get("summary", "")
                     score = article.get("relevance_score", 0)
+                    published = article.get("published_at", "")
+
+                    # Format timestamp if available
+                    timestamp_iso = None
+                    if published:
+                        try:
+                            if isinstance(published, str):
+                                from datetime import datetime as dt_
+                                pub_dt = dt_.fromisoformat(published.replace("Z", "+00:00"))
+                            else:
+                                pub_dt = published
+                            timestamp_iso = pub_dt.isoformat()
+                        except Exception:
+                            pass
 
                     # Build description with summary or content
                     description = ""
                     if summary:
-                        description = summary[:300]
+                        description = summary[:400]
                     else:
-                        content = article.get("content", "")[:300]
+                        content = article.get("content", "")[:400]
                         if content:
                             description = content
 
@@ -187,11 +201,16 @@ class DiscordNotifier:
                         if not description.endswith((".", "!", "?", "…")):
                             description += "…"
                     else:
-                        description = f"*Click to read on {source}*"
+                        # Better fallback than "Click to read on source"
+                        description = f"**[Read full article on {source} →]({url})**"
+
+                    # Append "Read more" link at end of description
+                    if description and url and not description.endswith(f"]({url})"):
+                        description += f"\n\n[Read more →]({url})"
 
                     # Build rich footer with stars for relevance
-                    stars = "★" * min(5, max(1, int(score * 5)))
-                    footer_text = f"{source}  •  {stars}  ({score:.0%})"
+                    stars = "★" * min(5, max(1, int(score * 5))) + "☆" * (5 - min(5, max(1, int(score * 5))))
+                    footer_text = f"{source}  •  {stars}  {score:.0%}"
 
                     embed = {
                         "title": f"{cat_emoji} {title}",
@@ -200,6 +219,10 @@ class DiscordNotifier:
                         "description": description,
                         "footer": {"text": footer_text}
                     }
+
+                    # Add timestamp if available (Discord renders this nicely)
+                    if timestamp_iso:
+                        embed["timestamp"] = timestamp_iso
 
                     embeds.append(embed)
                     article_count += 1

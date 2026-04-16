@@ -27,6 +27,17 @@ class NewsSourceAggregator:
         ("Stability AI", "https://stability.ai/news?format=rss", "stability"),
         ("Cohere Blog", "https://cohere.com/blog/rss.xml", "cohere"),
 
+        # Chinese AI companies — user specifically wants these
+        ("Qwen (Alibaba)", "https://qwenlm.github.io/index.xml", "qwen"),
+        ("DeepSeek Blog", "https://api-docs.deepseek.com/feed", "deepseek"),
+        ("Baidu Research", "http://research.baidu.com/Blog/index-view?id=rss", "baidu"),
+        ("HackerNews - Chinese AI", "https://hnrss.org/newest?q=Qwen+OR+DeepSeek+OR+Baichuan+OR+ChatGLM+OR+Yi+OR+Kimi", "hn-china"),
+
+        # AI YouTube / trending projects — user wants trendy stuff
+        ("HackerNews - AI Projects", "https://hnrss.org/newest?q=AI+agent+OR+LLM+framework+OR+agentic+OR+open+source+AI+OR+AI+tool", "hn-ai-projects"),
+        ("HackerNews - New Models", "https://hnrss.org/newest?q=new+model+OR+model+release+OR+trained+OR+fine-tuned", "hn-models"),
+        ("GitHub Trending AI", "https://hnrss.org/newest?q=github+trending+AI", "gh-trending-ai"),
+
         # AI-focused news outlets
         ("The Verge - AI", "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml", "verge-ai"),
         ("TechCrunch AI", "https://techcrunch.com/category/artificial-intelligence/feed/", "tc-ai"),
