@@ -124,10 +124,15 @@ class DiscordNotifier:
             date_str = now.strftime("%B %d, %Y")
             time_str = now.strftime("%I:%M %p")
 
+            category_breakdown = ", ".join(
+                f"{k}: {len(v)}" for k, v in articles_by_category.items() if v
+            )
+
             header_embed = {
-                "title": date_str,
-                "description": f"{time_str}\n{total_articles} stories",
-                "color": 0x1f77b4
+                "title": f"📰 SCOUT News Digest",
+                "description": f"**{date_str}** • {time_str}\n\n{total_articles} curated stories\n{category_breakdown}",
+                "color": 0x1f77b4,
+                "footer": {"text": "SCOUT AI News Monitor"}
             }
 
             embeds.append(header_embed)
@@ -144,25 +149,33 @@ class DiscordNotifier:
                     if article_count >= 10:
                         break
 
-                    title = article.get("title", "")[:150]
+                    title = article.get("title", "")[:200]
                     url = article.get("url", "")
                     source = article.get("source", "Unknown")
                     summary = article.get("summary", "")
+                    score = article.get("relevance_score", 0)
+                    published = article.get("published_at", "")
 
                     # Build description with summary or content
                     description = ""
                     if summary:
-                        description = summary[:200]
+                        description = summary[:250]
                     else:
-                        content = article.get("content", "")[:200]
+                        content = article.get("content", "")[:250]
                         if content:
                             description = content
+
+                    # Add source and relevance to footer
+                    footer_text = f"{source}"
+                    if score > 0:
+                        footer_text += f" • Relevance: {score:.0%}"
 
                     embed = {
                         "title": title,
                         "url": url,
                         "color": cat_color,
-                        "description": description if description else source
+                        "description": description if description else f"[{source}]",
+                        "footer": {"text": footer_text}
                     }
 
                     embeds.append(embed)

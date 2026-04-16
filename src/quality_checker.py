@@ -32,14 +32,17 @@ class QualityChecker:
         r"absolutely.*must.*see",
     ]
 
-    # Low-quality source patterns
+    # Low-quality source patterns (too spammy/not real news)
     LOW_QUALITY_SOURCES = [
         "medium.com/tag",
         "linkedin.com/pulse",
-        "dev.to/feed",
+        "dev.to",  # Too tutorial-heavy
+        "product hunt",  # Marketing noise
         "substack.com",
         "patreon",
         "kickstarter",
+        "github trending",  # Repos, not news
+        "indie hackers",  # Startup spam
     ]
 
     # Minimum quality thresholds (SLACK MODE)
