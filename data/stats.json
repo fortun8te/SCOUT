@@ -1,5 +1,5 @@
 {
-  "total_articles_processed": 579,
+  "total_articles_processed": 701,
   "total_articles_sent": 141,
   "runs": [
     {
@@ -119,20 +119,39 @@
         "GitHub Trending"
       ],
       "discovery_rate": 0.19708029197080293
+    },
+    {
+      "timestamp": "2026-04-16T00:14:57.931492Z",
+      "articles_fetched": 122,
+      "articles_sent": 0,
+      "sources_checked": [
+        "HackerNews",
+        "ArXiv",
+        "Reddit",
+        "Lobsters",
+        "TechCrunch",
+        "Medium",
+        "Indie Hackers",
+        "Slashdot",
+        "Mastodon",
+        "RSS Feeds (20+ sources)",
+        "GitHub Trending"
+      ],
+      "discovery_rate": 0.0
     }
   ],
   "top_sources": {
-    "HackerNews": 8,
-    "ArXiv": 8,
-    "Reddit": 8,
-    "GitHub Trending": 8,
-    "Lobsters": 4,
-    "TechCrunch": 4,
-    "Medium": 3,
-    "Indie Hackers": 3,
-    "Slashdot": 3,
-    "Mastodon": 3,
-    "RSS Feeds (20+ sources)": 2
+    "HackerNews": 9,
+    "ArXiv": 9,
+    "Reddit": 9,
+    "GitHub Trending": 9,
+    "Lobsters": 5,
+    "TechCrunch": 5,
+    "Medium": 4,
+    "Indie Hackers": 4,
+    "Slashdot": 4,
+    "Mastodon": 4,
+    "RSS Feeds (20+ sources)": 3
   },
   "trending_keywords": {
     "claude": 5,
@@ -157,7 +176,7 @@
   "category_distribution": {},
   "hourly_distribution": {
     "hour_23": 7,
-    "hour_00": 1
+    "hour_00": 2
   },
   "discovery_rate": 0
 }
