@@ -187,6 +187,14 @@ async def main():
             f"near-duplicates"
         )
 
+        # Cross-source trending detection: annotate representatives with
+        # trending_source_count so the filter can boost their score.
+        trending_map = deduplicator.detect_trending(deduplicated)
+        multi_source = sum(1 for v in trending_map.values() if v > 1)
+        logger.info(
+            f"[TRENDING] Found {multi_source} articles covered by 2+ sources"
+        )
+
         # Filter and rank articles (balance: filter AI-relevant but not too strict)
         filter_engine = FilterEngine(threshold=0.20)
         filtered_articles = filter_engine.filter_and_rank(deduplicated)
