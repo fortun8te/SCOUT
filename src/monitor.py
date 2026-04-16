@@ -293,6 +293,21 @@ async def main():
                 f"{', '.join(f'{k}:{len(v)}' for k, v in categorized.items() if v)}"
             )
 
+            # Attach bracketed label (e.g. [RELEASE]) to each article for Discord
+            label_counts = {}
+            for category, cat_articles in categorized.items():
+                for article in cat_articles:
+                    article["category"] = category
+                    label = filter_engine.detect_label(article)
+                    article["label"] = label
+                    key = label or "(none)"
+                    label_counts[key] = label_counts.get(key, 0) + 1
+            if label_counts:
+                logger.info(
+                    f"[LABELS] "
+                    f"{', '.join(f'{k}:{v}' for k, v in label_counts.items())}"
+                )
+
             # Send immediate breaking news alerts (score > 0.9 + breaking category)
             breaking_articles = categorized.get("breaking", [])
             if breaking_articles:

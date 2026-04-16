@@ -17,6 +17,9 @@ class DiscordNotifier:
         "breaking": 0xff006e,    # Red/Pink
         "models": 0x00b4d8,      # Blue
         "agents": 0x2ecc71,      # Green
+        "funding": 0xf2c14e,     # Gold
+        "drama": 0xe63946,       # Crimson
+        "people": 0xff9f1c,      # Orange
         "research": 0x8338ec,    # Purple
         "technical": 0xfbf007,   # Yellow
         "other": 0x606060        # Gray
@@ -153,7 +156,12 @@ class DiscordNotifier:
                     if article_count >= 10:
                         break
 
-                    title = article.get("title", "")[:200]
+                    raw_title = article.get("title", "")
+                    label = article.get("label", "")
+                    if label:
+                        title = f"{label} {raw_title}"[:200]
+                    else:
+                        title = raw_title[:200]
                     url = article.get("url", "")
                     source = article.get("source", "Unknown")
                     summary = article.get("summary", "")
