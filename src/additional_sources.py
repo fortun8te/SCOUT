@@ -157,10 +157,9 @@ class AdditionalSources:
         return articles
 
     async def fetch_x_trending(self) -> List[Dict]:
-        """Fetch X trending for AI"""
+        """Fetch X trending for AI (always include Claude & Anthropic)"""
         articles = []
         try:
-            # Try multiple Nitter instances for reliability
             nitter_urls = [
                 "https://nitter.net/search",
                 "https://nitter.1d4.us/search",
@@ -170,6 +169,40 @@ class AdditionalSources:
             import re as regex
             ai_keywords = ['ai', 'artificial', 'ml', 'llm', 'gpt', 'claude', 'openai', 'anthropic']
 
+            # First, fetch Claude/Anthropic specific content
+            for nitter_url in nitter_urls:
+                if len(articles) >= 1:
+                    break
+                try:
+                    response = self.session.get(
+                        nitter_url,
+                        params={"q": "Claude OR Anthropic", "f": "latest"},
+                        timeout=8,
+                        headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    if response.status_code != 200:
+                        continue
+                    posts = regex.findall(r'<div class="[^"]*post[^"]*">([^<]*(?:<[^>]+>[^<]*)*)</div>', response.text)
+                    for post_html in posts[:5]:
+                        try:
+                            text = regex.sub(r'<[^>]+>', '', post_html).strip()
+                            if len(text) > 15:
+                                articles.append({
+                                    "id": f"x_claude_{len(articles)}",
+                                    "title": text[:150],
+                                    "url": "https://x.com/search?q=Claude",
+                                    "source": "X Trending",
+                                    "published_at": datetime.utcnow(),
+                                    "engagement_score": 0,
+                                    "is_recent": True
+                                })
+                                break
+                        except Exception:
+                            continue
+                except Exception:
+                    continue
+
+            # Then fetch general AI trending
             for nitter_url in nitter_urls:
                 if len(articles) >= 5:
                     break
@@ -182,8 +215,6 @@ class AdditionalSources:
                     )
                     if response.status_code != 200:
                         continue
-
-                    # Extract posts
                     posts = regex.findall(r'<div class="[^"]*post[^"]*">([^<]*(?:<[^>]+>[^<]*)*)</div>', response.text)
                     for post_html in posts[:10]:
                         if len(articles) >= 5:
@@ -205,13 +236,13 @@ class AdditionalSources:
                 except Exception:
                     continue
 
-            # Fallback: ensure at least 5 stories
+            # Ensure at least 5 stories, always include Claude/Anthropic
             if len(articles) < 5:
                 topics = [
-                    ("Artificial Intelligence", "AI breakthroughs"),
-                    ("Machine Learning", "New ML models"),
-                    ("Large Language Models", "LLM updates"),
-                    ("Neural Networks", "Deep learning"),
+                    ("Claude AI", "Claude breakthroughs"),
+                    ("Anthropic", "Anthropic updates"),
+                    ("Machine Learning", "ML trends"),
+                    ("LLMs", "LLM advancements"),
                     ("AI Research", "AI papers")
                 ]
                 for topic, desc in topics[:(5 - len(articles))]:
