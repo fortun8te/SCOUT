@@ -119,48 +119,35 @@ class DiscordNotifier:
 
             embeds = []
 
-            # Create header embed - bold, clear, informative
+            # Header embed - clean, no emojis
             total_articles = sum(len(v) for v in articles_by_category.values())
             now = datetime.now()
-            date_str = now.strftime("%A, %B %d, %Y")
-            time_str = now.strftime("%-I:%M %p UTC")
+            date_str = now.strftime("%B %d, %Y")
 
-            # Category emojis
-            cat_emojis = {
-                "breaking": "🔥",
-                "models": "🚀",
-                "agents": "🤖",
-                "research": "🔬",
-                "technical": "⚙️",
-                "other": "📌",
-            }
-            breakdown_lines = []
+            breakdown_parts = []
             for k, v in articles_by_category.items():
                 if v:
-                    emoji = cat_emojis.get(k, "•")
-                    breakdown_lines.append(f"{emoji} **{k.title()}**: {len(v)}")
+                    breakdown_parts.append(f"**{k.title()}** ({len(v)})")
 
             header_embed = {
-                "title": f"🤖 AI News Digest",
+                "title": f"AI News — {date_str}",
                 "description": (
-                    f"*{date_str}* — *{time_str}*\n\n"
-                    f"**{total_articles} curated stories**\n\n"
-                    + "\n".join(breakdown_lines)
+                    f"{total_articles} stories from the last 48 hours\n"
+                    + " · ".join(breakdown_parts)
                 ),
-                "color": 0x5865F2,  # Discord blurple
-                "footer": {"text": "SCOUT • Next update in 6 hours"}
+                "color": 0x2b2d31,  # Discord dark grey
+                "footer": {"text": "Next update in 6 hours"}
             }
 
             embeds.append(header_embed)
 
-            # Create embeds for each article (max 10 total)
+            # Article embeds — clean, informative, no emojis
             article_count = 0
             for category, articles in articles_by_category.items():
                 if not articles or article_count >= 10:
                     continue
 
                 cat_color = self.CATEGORY_COLORS.get(category, 0x606060)
-                cat_emoji = cat_emojis.get(category, "📌")
 
                 for article in articles[:3]:
                     if article_count >= 10:
@@ -170,10 +157,9 @@ class DiscordNotifier:
                     url = article.get("url", "")
                     source = article.get("source", "Unknown")
                     summary = article.get("summary", "")
-                    score = article.get("relevance_score", 0)
                     published = article.get("published_at", "")
 
-                    # Format timestamp if available
+                    # Format timestamp (Discord renders relative: "2 hours ago")
                     timestamp_iso = None
                     if published:
                         try:
@@ -182,45 +168,44 @@ class DiscordNotifier:
                                 pub_dt = dt_.fromisoformat(published.replace("Z", "+00:00"))
                             else:
                                 pub_dt = published
+                            if pub_dt.tzinfo is None:
+                                from datetime import timezone
+                                pub_dt = pub_dt.replace(tzinfo=timezone.utc)
                             timestamp_iso = pub_dt.isoformat()
                         except Exception:
                             pass
 
-                    # Build description with summary or content
+                    # Build description - prefer real summary, clean it up
                     description = ""
                     if summary:
-                        description = summary[:400]
+                        description = summary[:350].strip()
                     else:
-                        content = article.get("content", "")[:400]
+                        content = article.get("content", "").strip()[:350]
                         if content:
                             description = content
 
-                    # Format description with better typography
-                    if description:
-                        description = description.strip()
-                        if not description.endswith((".", "!", "?", "…")):
-                            description += "…"
-                    else:
-                        # Better fallback than "Click to read on source"
-                        description = f"**[Read full article on {source} →]({url})**"
+                    # Add trailing ellipsis if truncated
+                    if description and not description.endswith((".", "!", "?", "…", '"', "'")):
+                        description += "…"
 
-                    # Append "Read more" link at end of description
-                    if description and url and not description.endswith(f"]({url})"):
-                        description += f"\n\n[Read more →]({url})"
-
-                    # Build rich footer with stars for relevance
-                    stars = "★" * min(5, max(1, int(score * 5))) + "☆" * (5 - min(5, max(1, int(score * 5))))
-                    footer_text = f"{source}  •  {stars}  {score:.0%}"
+                    # Category label (not emoji)
+                    cat_label = category.upper()
 
                     embed = {
-                        "title": f"{cat_emoji} {title}",
+                        "title": title,
                         "url": url,
                         "color": cat_color,
-                        "description": description,
-                        "footer": {"text": footer_text}
+                        "author": {
+                            "name": f"{cat_label}  ·  {source}"
+                        },
+                        "footer": {"text": f"{source}"}
                     }
 
-                    # Add timestamp if available (Discord renders this nicely)
+                    # Only add description if we have real content
+                    if description:
+                        embed["description"] = description
+
+                    # Timestamp (Discord renders as relative time)
                     if timestamp_iso:
                         embed["timestamp"] = timestamp_iso
 

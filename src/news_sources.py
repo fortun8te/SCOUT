@@ -71,37 +71,115 @@ class NewsSourceAggregator:
         self.session = requests.Session()
 
     async def fetch_from_rss_sources(self) -> List[Dict]:
-        """Fetch from all AI-focused RSS feeds"""
+        """Fetch from all AI-focused RSS feeds with proper parsing"""
+        from bs4 import BeautifulSoup
+        from email.utils import parsedate_to_datetime
+        import hashlib
+
         articles = []
-        # All sources are AI-focused, fetch them all
+        now = datetime.utcnow()
+        cutoff = now - timedelta(hours=48)  # Only last 48 hours
+
         for source_name, url, source_id in self.RSS_SOURCES:
             try:
-                response = self.session.get(url, timeout=5)
-                if response.status_code == 200:
-                    import re as regex
-                    titles = regex.findall(r'<title>([^<]+)</title>', response.text)
-                    links = regex.findall(r'<link>([^<]+)</link>', response.text)
+                response = self.session.get(
+                    url,
+                    timeout=8,
+                    headers={"User-Agent": "SCOUT-News-Bot/1.0"}
+                )
+                if response.status_code != 200:
+                    continue
 
-                    for i, title in enumerate(titles[1:12]):
-                        if i < len(links):
-                            try:
-                                articles.append({
-                                    "id": f"{source_id}_{i}",
-                                    "title": title.strip()[:200],
-                                    "url": links[i] if links[i].startswith('http') else url,
-                                    "source": source_name,
-                                    "published_at": datetime.utcnow(),
-                                    "engagement_score": 0,
-                                    "is_recent": True
-                                })
-                            except:
-                                continue
+                # Parse with BeautifulSoup as XML
+                soup = BeautifulSoup(response.text, "xml")
+
+                # Handle both RSS (<item>) and Atom (<entry>) formats
+                items = soup.find_all("item") or soup.find_all("entry")
+
+                for item in items[:15]:
+                    try:
+                        # Extract title
+                        title_el = item.find("title")
+                        title = title_el.get_text(strip=True) if title_el else ""
+                        if not title:
+                            continue
+
+                        # Extract URL (RSS <link> text, Atom <link href="">)
+                        link_el = item.find("link")
+                        if link_el:
+                            link = link_el.get("href") or link_el.get_text(strip=True)
+                        else:
+                            link = ""
+                        if not link or not link.startswith("http"):
+                            continue
+
+                        # Extract publish date
+                        pub_date = None
+                        for tag in ("pubDate", "published", "updated", "dc:date"):
+                            date_el = item.find(tag)
+                            if date_el and date_el.get_text(strip=True):
+                                try:
+                                    date_str = date_el.get_text(strip=True)
+                                    pub_date = parsedate_to_datetime(date_str)
+                                    # Strip timezone for comparison
+                                    if pub_date.tzinfo:
+                                        pub_date = pub_date.replace(tzinfo=None)
+                                    break
+                                except Exception:
+                                    try:
+                                        pub_date = datetime.fromisoformat(
+                                            date_str.replace("Z", "+00:00")
+                                        )
+                                        if pub_date.tzinfo:
+                                            pub_date = pub_date.replace(tzinfo=None)
+                                        break
+                                    except Exception:
+                                        continue
+
+                        # Skip articles older than 48h (when we have a real date)
+                        if pub_date and pub_date < cutoff:
+                            continue
+                        if not pub_date:
+                            pub_date = now
+
+                        # Extract description/summary
+                        description = ""
+                        for tag in ("description", "summary", "content", "content:encoded"):
+                            desc_el = item.find(tag)
+                            if desc_el:
+                                desc_html = desc_el.get_text(strip=True)
+                                if desc_html:
+                                    # Strip remaining HTML
+                                    desc_clean = BeautifulSoup(
+                                        desc_html, "html.parser"
+                                    ).get_text(separator=" ", strip=True)
+                                    description = desc_clean[:500]
+                                    break
+
+                        # Stable ID based on URL hash (for proper dedup)
+                        url_hash = hashlib.md5(link.encode()).hexdigest()[:12]
+
+                        articles.append({
+                            "id": f"{source_id}_{url_hash}",
+                            "title": title[:200],
+                            "url": link,
+                            "source": source_name,
+                            "published_at": pub_date,
+                            "content": description,
+                            "summary": description[:280] if description else "",
+                            "engagement_score": 0,
+                            "is_recent": (now - pub_date).total_seconds() < 86400,  # <24h
+                        })
+                    except Exception as e:
+                        logger.debug(f"Parse error in {source_name}: {e}")
+                        continue
+
             except Exception as e:
                 logger.debug(f"{source_name} RSS error: {e}")
                 continue
 
         if articles:
-            logger.info(f"Fetched {len(articles)} articles from RSS sources")
+            logger.info(f"Fetched {len(articles)} articles from RSS sources (last 48h)")
         return articles
 
     async def fetch_all(self):
