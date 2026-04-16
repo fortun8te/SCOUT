@@ -26,15 +26,15 @@ class DiscordNotifier:
         self.channel_id = channel_id
         self.user_id = user_id
         self.dm_channel_id = None
+        self.api_url = None
 
-        # For DMs, we'll get the DM channel on first use
-        if user_id and not channel_id:
-            self._init_dm_channel()
-
+        # Set API URL based on what's available
         if channel_id:
+            # Prefer channel mode
             self.api_url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
-        else:
-            self.api_url = None
+        elif user_id:
+            # Fall back to DM mode
+            self._init_dm_channel()
 
     def _init_dm_channel(self):
         """Initialize DM channel with user"""
