@@ -14,55 +14,45 @@ logger = logging.getLogger(__name__)
 class NewsSourceAggregator:
     """Aggregates news from multiple sources"""
 
-    # Hundreds of diverse sources
+    # AI-focused news sources ONLY (no generic tech/coding blogs)
     RSS_SOURCES = [
-        # Tech news (20+)
-        ("Echo JS", "https://www.echojs.com/rss", "echojs"),
-        ("CSS Tricks", "https://css-tricks.com/feed/", "csstricks"),
-        ("Smashing Magazine", "https://www.smashingmagazine.com/feed.xml", "smashing"),
-        ("Web Dev Simplified", "https://blog.webdevsimplified.com/rss.xml", "wds"),
-        ("Dev.blog", "https://dev.blog/feed/", "devblog"),
-        ("Wired", "https://www.wired.com/feed/rss", "wired"),
-        ("VentureBeat", "https://venturebeat.com/feed/", "venturebeat"),
-        ("MIT Tech Review", "https://www.technologyreview.com/feed.rss", "mitreview"),
-        ("The Verge", "https://www.theverge.com/rss/index.xml", "verge"),
-        ("Ars Technica", "https://feeds.arstechnica.com/arstechnica/index", "arstechnica"),
-        ("Engadget", "https://www.engadget.com/feed.xml", "engadget"),
-        ("AnandTech", "https://www.anandtech.com/rss/", "anandtech"),
-        ("Tom's Hardware", "https://www.tomshardware.com/feeds/all", "tomshardware"),
-        ("Hacker News", "https://news.ycombinator.com/rss", "hn-rss"),
-        ("Slashdot", "https://slashdot.org/slashdot.rss", "slashdot-rss"),
-        ("InfoQ", "https://www.infoq.com/feed/", "infoq"),
-        ("DZone", "https://feeds.dzone.com/home", "dzone"),
-        ("Dev.to", "https://dev.to/rss", "devto-rss"),
-        ("Indie Hackers", "https://www.indiehackers.com/feed.rss", "ih-rss"),
-        ("Product Hunt", "https://www.producthunt.com/feed", "ph-rss"),
-        # Programming & Dev (15+)
-        ("GitHub Blog", "https://github.blog/feed/", "github"),
-        ("Stack Overflow", "https://stackoverflow.com/feeds/tag/artificial-intelligence", "so-ai"),
-        ("Coding Horror", "https://blog.codinghorror.com/feed/", "codingerror"),
-        ("Scott Hanselman", "https://www.hanselman.com/blog/feed.aspx", "hanselman"),
-        ("The Daily WTF", "https://thedailywtf.com/rss.ashx", "wtf"),
-        ("Elegant Code", "https://elegantcode.com/feed/", "elegantcode"),
-        ("Martin Fowler", "https://martinfowler.com/feed.atom", "fowler"),
-        ("Joel on Software", "https://www.joelonsoftware.com/feed/", "joel"),
-        ("Paul Graham Essays", "http://paulgraham.com/rss.html", "pg"),
-        # AI/ML Specific (15+)
-        ("Papers with Code", "https://paperswithcode.com/rss", "pwc"),
-        ("OpenAI Blog", "https://openai.com/feed.rss", "openai"),
-        ("Anthropic News", "https://www.anthropic.com/news", "anthropic"),
-        ("DeepMind Blog", "https://deepmind.com/blog/feed.xml", "deepmind"),
-        ("Google AI Blog", "https://ai.googleblog.com/feeds/posts/default", "googleai"),
-        ("Facebook AI", "https://www.facebook.com/feeds/page.php?id=1721436024628367", "fbai"),
+        # Official AI company blogs - HIGHEST PRIORITY
+        ("OpenAI Blog", "https://openai.com/blog/rss.xml", "openai"),
+        ("Anthropic News", "https://www.anthropic.com/news/rss.xml", "anthropic"),
+        ("DeepMind Blog", "https://deepmind.google/blog/rss.xml", "deepmind"),
+        ("Google AI Blog", "https://blog.google/technology/ai/rss/", "googleai"),
+        ("Meta AI Blog", "https://ai.meta.com/blog/rss/", "metaai"),
         ("Hugging Face Blog", "https://huggingface.co/blog/feed.xml", "hf"),
-        ("Towards Data Science", "https://towardsdatascience.com/feed", "tds"),
-        ("Machine Learning Mastery", "https://machinelearningmastery.com/feed/", "mlm"),
-        # News aggregators (10+)
-        ("Hacker News Weekly", "https://hnweekly.com/feed.rss", "hnweekly"),
-        ("JavaScript Weekly", "https://javascriptweekly.com/rss.xml", "jsweekly"),
-        ("Python Weekly", "https://www.pythonweekly.com/feed/", "pyweekly"),
-        ("Web Development Reading List", "https://wdrl.info/feed", "wdrl"),
-        ("Briefbox", "https://briefbox.me/rss", "briefbox"),
+        ("Mistral AI", "https://mistral.ai/news/", "mistral"),
+        ("Stability AI", "https://stability.ai/news?format=rss", "stability"),
+        ("Cohere Blog", "https://cohere.com/blog/rss.xml", "cohere"),
+
+        # AI-focused news outlets
+        ("The Verge - AI", "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml", "verge-ai"),
+        ("TechCrunch AI", "https://techcrunch.com/category/artificial-intelligence/feed/", "tc-ai"),
+        ("VentureBeat AI", "https://venturebeat.com/category/ai/feed/", "vb-ai"),
+        ("Ars Technica AI", "https://arstechnica.com/ai/feed/", "ars-ai"),
+        ("MIT Tech Review AI", "https://www.technologyreview.com/topic/artificial-intelligence/feed", "mit-ai"),
+        ("Wired AI", "https://www.wired.com/feed/tag/ai/latest/rss", "wired-ai"),
+
+        # AI newsletters and curated content
+        ("The Batch (DeepLearning.AI)", "https://www.deeplearning.ai/the-batch/feed/", "batch"),
+        ("Ahead of AI", "https://magazine.sebastianraschka.com/feed", "aheadofai"),
+        ("Import AI", "https://jack-clark.net/feed/", "importai"),
+        ("The Algorithmic Bridge", "https://www.thealgorithmicbridge.com/feed", "algobridge"),
+        ("Latent Space", "https://www.latent.space/feed", "latentspace"),
+        ("Every AI", "https://every.to/rss", "every"),
+
+        # AI YouTube channel RSS (video descriptions often link to news)
+        ("Two Minute Papers", "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg", "2mp"),
+        ("AI Explained", "https://www.youtube.com/feeds/videos.xml?channel_id=UCNJ1Ymd5yFuUPtn21xtRbbw", "aiexplained"),
+        ("Matt Wolfe", "https://www.youtube.com/feeds/videos.xml?channel_id=UChpleBmo18P08aKCIgti38g", "mattwolfe"),
+        ("Wes Roth", "https://www.youtube.com/feeds/videos.xml?channel_id=UCqcbQf6yw5KzRoDDcZ_wBSw", "wesroth"),
+        ("Fireship", "https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA", "fireship"),
+        ("Yannic Kilcher", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZHmQk67mSJgfCCTn7xBfew", "yannic"),
+
+        # AI startup / funding focus
+        ("Hacker News", "https://hnrss.org/newest?q=AI+OR+LLM+OR+GPT+OR+Claude+OR+Anthropic+OR+OpenAI", "hn-ai"),
     ]
 
     def __init__(self, api_keys: Dict[str, str] = None):
@@ -70,11 +60,10 @@ class NewsSourceAggregator:
         self.session = requests.Session()
 
     async def fetch_from_rss_sources(self) -> List[Dict]:
-        """Fetch from RSS feeds - hundreds of potential sources"""
+        """Fetch from all AI-focused RSS feeds"""
         articles = []
-        # Sample from the massive list (rotate through them)
-        sampled_sources = self.RSS_SOURCES[::3]  # Take every 3rd source for speed
-        for source_name, url, source_id in sampled_sources:
+        # All sources are AI-focused, fetch them all
+        for source_name, url, source_id in self.RSS_SOURCES:
             try:
                 response = self.session.get(url, timeout=5)
                 if response.status_code == 200:

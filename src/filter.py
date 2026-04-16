@@ -137,21 +137,63 @@ KEYWORDS = {
     }
 }
 
-# Source credibility
+# Source credibility - AI-focused outlets boosted
 CREDIBLE_SOURCES = {
-    "OpenAI": 0.25,
-    "Anthropic": 0.25,
-    "Google DeepMind": 0.25,
-    "Google": 0.23,
-    "Meta AI": 0.20,
-    "ArXiv": 0.20,
-    "Hugging Face": 0.20,
-    "TechCrunch": 0.15,
-    "The Verge": 0.14,
-    "HackerNews": 0.15,
-    "Medium": 0.10,
-    "Reddit": 0.08
+    # Official AI company blogs - MAXIMUM trust
+    "OpenAI": 0.30,
+    "Anthropic": 0.30,
+    "DeepMind": 0.30,
+    "Google AI": 0.28,
+    "Meta AI": 0.25,
+    "Hugging Face": 0.25,
+    "Mistral": 0.25,
+    "Stability": 0.23,
+    "Cohere": 0.23,
+
+    # AI-focused news sections
+    "TechCrunch AI": 0.22,
+    "VentureBeat AI": 0.22,
+    "Verge - AI": 0.22,
+    "Ars Technica AI": 0.20,
+    "MIT Tech Review AI": 0.22,
+    "Wired AI": 0.20,
+
+    # AI newsletters
+    "The Batch": 0.22,
+    "Ahead of AI": 0.20,
+    "Import AI": 0.22,
+    "Latent Space": 0.20,
+    "Algorithmic Bridge": 0.18,
+
+    # AI YouTubers
+    "Two Minute Papers": 0.18,
+    "AI Explained": 0.22,
+    "Matt Wolfe": 0.18,
+    "Wes Roth": 0.16,
+    "Yannic Kilcher": 0.20,
+    "Fireship": 0.15,
+
+    # Generic tech (lower priority)
+    "Hacker News": 0.12,
+    "Reddit": 0.08,
+    "ArXiv": 0.08,  # Lowered - user doesn't want research papers
 }
+
+# AI-related required keywords - article MUST contain at least one to pass
+AI_RELEVANCE_KEYWORDS = [
+    "ai", "artificial intelligence", "machine learning", "ml",
+    "openai", "anthropic", "claude", "gpt", "chatgpt",
+    "google", "deepmind", "gemini", "meta", "llama",
+    "mistral", "qwen", "alibaba", "hugging face", "huggingface",
+    "grok", "xai", "higgsfield", "stability", "cohere",
+    "model", "llm", "language model", "agent", "agentic",
+    "neural network", "transformer", "diffusion",
+    "reasoning", "multimodal", "vision model", "rag",
+    "fine-tun", "training", "inference", "alignment",
+    "openclaw", "opus", "sonnet", "haiku", "o1", "o3",
+    "midjourney", "dall-e", "flux", "sora", "veo",
+    "copilot", "cursor", "codex", "devin",
+]
 
 
 class FilterEngine:
@@ -162,11 +204,18 @@ class FilterEngine:
 
     def calculate_score(self, article: Dict) -> float:
         """Calculate relevance score for an article (0-1.0)"""
-        score = 0.0
         title = article.get("title", "").lower()
         source = article.get("source", "")
 
-        # 1. Source credibility (0-0.25)
+        # HARD REQUIREMENT: article must mention AI/ML topic in title
+        # Otherwise score = 0 (will be filtered out)
+        has_ai_keyword = any(kw in title for kw in AI_RELEVANCE_KEYWORDS)
+        if not has_ai_keyword:
+            return 0.0
+
+        score = 0.0
+
+        # 1. Source credibility (0-0.30)
         for credible_source, weight in CREDIBLE_SOURCES.items():
             if credible_source.lower() in source.lower():
                 score += weight

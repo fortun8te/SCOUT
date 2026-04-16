@@ -118,32 +118,47 @@ class DiscordNotifier:
 
             embeds = []
 
-            # Create header embed
+            # Create header embed - bold, clear, informative
             total_articles = sum(len(v) for v in articles_by_category.values())
             now = datetime.now()
-            date_str = now.strftime("%B %d, %Y")
-            time_str = now.strftime("%I:%M %p")
+            date_str = now.strftime("%A, %B %d, %Y")
+            time_str = now.strftime("%-I:%M %p UTC")
 
-            category_breakdown = ", ".join(
-                f"{k}: {len(v)}" for k, v in articles_by_category.items() if v
-            )
+            # Category emojis
+            cat_emojis = {
+                "models": "🚀",
+                "breaking": "🔥",
+                "research": "🔬",
+                "technical": "⚙️",
+                "other": "📌",
+            }
+            breakdown_lines = []
+            for k, v in articles_by_category.items():
+                if v:
+                    emoji = cat_emojis.get(k, "•")
+                    breakdown_lines.append(f"{emoji} **{k.title()}**: {len(v)}")
 
             header_embed = {
-                "title": f"📰 SCOUT News Digest",
-                "description": f"**{date_str}** • {time_str}\n\n{total_articles} curated stories\n{category_breakdown}",
-                "color": 0x1f77b4,
-                "footer": {"text": "SCOUT AI News Monitor"}
+                "title": f"🤖 AI News Digest",
+                "description": (
+                    f"*{date_str}* — *{time_str}*\n\n"
+                    f"**{total_articles} curated stories**\n\n"
+                    + "\n".join(breakdown_lines)
+                ),
+                "color": 0x5865F2,  # Discord blurple
+                "footer": {"text": "SCOUT • Next update in 6 hours"}
             }
 
             embeds.append(header_embed)
 
-            # Create embeds for each article (max 10 total, 3 per category)
+            # Create embeds for each article (max 10 total)
             article_count = 0
             for category, articles in articles_by_category.items():
                 if not articles or article_count >= 10:
                     continue
 
                 cat_color = self.CATEGORY_COLORS.get(category, 0x606060)
+                cat_emoji = cat_emojis.get(category, "📌")
 
                 for article in articles[:3]:
                     if article_count >= 10:
@@ -154,27 +169,33 @@ class DiscordNotifier:
                     source = article.get("source", "Unknown")
                     summary = article.get("summary", "")
                     score = article.get("relevance_score", 0)
-                    published = article.get("published_at", "")
 
                     # Build description with summary or content
                     description = ""
                     if summary:
-                        description = summary[:250]
+                        description = summary[:300]
                     else:
-                        content = article.get("content", "")[:250]
+                        content = article.get("content", "")[:300]
                         if content:
                             description = content
 
-                    # Add source and relevance to footer
-                    footer_text = f"{source}"
-                    if score > 0:
-                        footer_text += f" • Relevance: {score:.0%}"
+                    # Format description with better typography
+                    if description:
+                        description = description.strip()
+                        if not description.endswith((".", "!", "?", "…")):
+                            description += "…"
+                    else:
+                        description = f"*Click to read on {source}*"
+
+                    # Build rich footer with stars for relevance
+                    stars = "★" * min(5, max(1, int(score * 5)))
+                    footer_text = f"{source}  •  {stars}  ({score:.0%})"
 
                     embed = {
-                        "title": title,
+                        "title": f"{cat_emoji} {title}",
                         "url": url,
                         "color": cat_color,
-                        "description": description if description else f"[{source}]",
+                        "description": description,
                         "footer": {"text": footer_text}
                     }
 
